@@ -1,8 +1,6 @@
 fit_penalized = function(st, model_name = 'pen',fold_col = NULL, fold_id = NULL, return_model_obj = F){
-  #load libs
-  library(h2o, lib.loc = st$general_settings$lib.loc)
-  pen_params = st$models[[model_name]]
 
+  pen_params = st$models[[model_name]]
 
   #if h2o isn't running, break
   h2o.init(startH2O=FALSE)

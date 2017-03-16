@@ -4,12 +4,6 @@
 #------------------------------------------------------------------------------#
 ##functions in this file
 #extract_covariates
-#find_binary
-#make_stacking_folds
-#check_names
-#format_covariates
-#parseArgsS
-#build_parameter_grid
 
 #Extract covariates: given a lat, long and time (e.g. period, year, whatever),
 #                    extract the raster values at a given location
@@ -24,9 +18,6 @@
 #                  to translate between actual time and the suffixes of the covariates.
 #                  E.g. 2004 would be translated into 5 (as its the fifth position)
 extract_covariates = function(xyt, covariate_list, centre_scale = T, time_var = 'year', time_scale = c(2000,2005,2010,2015)){
-  #load libraries (should this be require?)
-  library(data.table)
-  library(raster)
 
   #deal with data table scoping
   xyt = copy(xyt)

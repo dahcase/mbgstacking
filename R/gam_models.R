@@ -4,10 +4,6 @@
 #------------------------------------------------------------------------------#
 fit_gam = function(st, model_name = 'gam',fold_col = NULL, fold_id = NULL, return_model_obj = F){
 
-  #load libs
-  library('mgcv', lib.loc =st$general_settings$lib.loc)
-  library('data.table', lib.loc =st$general_settings$lib.loc)
-
   #subset the model parameters we need
   gam_params = st$model[[model_name]]
 

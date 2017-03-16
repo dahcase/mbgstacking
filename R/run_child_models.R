@@ -1,7 +1,5 @@
 #Functions to run stacking altogether
 run_stacking_child_models = function(st){
-  #load library for mclapply
-  library(parallel)
 
   #build the grid to govern the mclapply call
   model_grid = data.table(expand.grid(

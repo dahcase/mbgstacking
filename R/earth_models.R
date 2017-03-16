@@ -4,10 +4,6 @@
 #------------------------------------------------------------------------------#
 fit_earth = function(st, model_name = 'earth',fold_col = NULL, fold_id = NULL, return_model_obj = F){
 
-  #load libs
-  library('earth', lib.loc =st$general_settings$lib.loc)
-  library('data.table', lib.loc =st$general_settings$lib.loc)
-
   #subset the model parameters we need
   earth_params = st$models[[model_name]]
 
