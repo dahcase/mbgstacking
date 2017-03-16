@@ -5,18 +5,19 @@
 ##functions in this file
 #extract_covariates
 
-#Extract covariates: given a lat, long and time (e.g. period, year, whatever),
-#                    extract the raster values at a given location
-#xyt: a data table with at least three columns: latitude, longitude and year
-#     or some other variable (specified by time_var) designating the time
-#covariate_list: A list of raster-like objects representing covariates
-#centre_scale: should the covariates be centre-scaled?
-#time_var: the column in xyt that denotes the time variable
-#build_time_scale: a vector denoting the full range of times under analysis.
-#                  For example, if we are analyzing yearly from 2000-2015, the
-#                  the vector should be 2000:2015. if specified, this will be used
-#                  to translate between actual time and the suffixes of the covariates.
-#                  E.g. 2004 would be translated into 5 (as its the fifth position)
+#' Extract covariate values (from raster-like objects) to points.
+#'
+#' @param xyt spatialpointsdataframe. A spdf where raster values should be extracted.
+#' @param covariate_list List. A list of raster-like objects holding covariate values.
+#' @param centre_scale Logical. Should the covariate values be centered?
+#' @param time_var Character. Column in the dataset representing the time. Should be matched with the bricks
+#' @param build_time_scale Numeric Vector. Denotes the full range of times under analysis.
+#'                  For example, if we are analyzing yearly from 2000-2015, the
+#'                  the vector should be 2000:2015. if specified, this will be used
+#'                  to translate between actual time and the suffixes of the covariates.
+#'                  E.g. 2004 would be translated into 5 (as its the fifth position)
+#' @return A spdf with columns of the extracted values from covariate list reconciled by time.
+#'         if centre_scale is T, returns the resulting data frame.
 extract_covariates = function(xyt, covariate_list, centre_scale = T, time_var = 'year', time_scale = c(2000,2005,2010,2015)){
 
   #deal with data table scoping

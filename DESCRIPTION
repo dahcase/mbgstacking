@@ -1,11 +1,18 @@
 Package: mbgstacking
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Title: Stacked generalization ensemble model for model-based geostatistics
+Version: 0.0.0.9000
+Author: Daniel Casey
+Maintainer: Daniel Casey <dccasey@uw.edu>
+Description: A series of functions to implement MBG stacking
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+Imports:
+    data.table,
+    raster,
+    earth,
+    mgcv,
+    h2o,
+    parallel
+RoxygenNote: 6.0.1
