@@ -16,3 +16,4 @@ Imports:
     h2o,
     parallel
 RoxygenNote: 6.0.1
+Suggests: testthat

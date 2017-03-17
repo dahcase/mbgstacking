@@ -2,21 +2,21 @@
 % Please edit documentation in R/covariate_functions.R
 \name{extract_covariates}
 \alias{extract_covariates}
-\title{Extract covariate values (from raster-like objects) to points.}
+\title{Extract Covariate Values}
 \usage{
 extract_covariates(xyt, covariate_list, centre_scale = T, time_var = "year",
   time_scale = c(2000, 2005, 2010, 2015))
 }
 \arguments{
-\item{xyt}{spatialpointsdataframe. A spatialpointsdataframe where raster values should be extracted.}
+\item{xyt}{spatialpointsdataframe. A spdf where raster values should be extracted.}
 
 \item{covariate_list}{List. A list of raster-like objects holding covariate values.}
 
-\item{centre_scale:}{Logical. Should the covariate values be centered?}
+\item{centre_scale}{Logical. Should the covariate values be centered?}
 
-\item{time_var:}{Character. Column in the dataset representing the time. Should be matched with the bricks}
+\item{time_var}{Character. Column in the dataset representing the time. Should be matched with the bricks}
 
-\item{build_time_scale.}{Numeric Vector. Denotes the full range of times under analysis.
+\item{build_time_scale}{Numeric Vector. Denotes the full range of times under analysis.
 For example, if we are analyzing yearly from 2000-2015, the
 the vector should be 2000:2015. if specified, this will be used
 to translate between actual time and the suffixes of the covariates.
@@ -24,8 +24,10 @@ E.g. 2004 would be translated into 5 (as its the fifth position)}
 }
 \value{
 A spdf with columns of the extracted values from covariate list reconciled by time.
-        if centre_scale is T, returns the resulting data frame.
+        if centre_scale is T, returns the extracted values after centre-scaling as well as
+        the centre_scale data frame for later use.
 }
 \description{
-Extract covariate values (from raster-like objects) to points.
+Given a SpatialPointsDataFrame, this function extracts values at the intersection
+from raster-like objects.
 }

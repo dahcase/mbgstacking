@@ -5,7 +5,10 @@
 ##functions in this file
 #extract_covariates
 
-#' Extract covariate values (from raster-like objects) to points.
+#' Extract Covariate Values
+#'
+#' Given a SpatialPointsDataFrame, this function extracts values at the intersection
+#' from raster-like objects.
 #'
 #' @param xyt spatialpointsdataframe. A spdf where raster values should be extracted.
 #' @param covariate_list List. A list of raster-like objects holding covariate values.
@@ -17,7 +20,11 @@
 #'                  to translate between actual time and the suffixes of the covariates.
 #'                  E.g. 2004 would be translated into 5 (as its the fifth position)
 #' @return A spdf with columns of the extracted values from covariate list reconciled by time.
-#'         if centre_scale is T, returns the resulting data frame.
+#'         if centre_scale is T, returns the extracted values after centre-scaling as well as
+#'         the centre_scale data frame for later use.
+#' @import data.table
+#' @export
+#'
 extract_covariates = function(xyt, covariate_list, centre_scale = T, time_var = 'year', time_scale = c(2000,2005,2010,2015)){
 
   #deal with data table scoping
@@ -33,7 +40,7 @@ extract_covariates = function(xyt, covariate_list, centre_scale = T, time_var = 
   xyt = xyt[,rid := 1:nrow(xyt)]
 
   #extract the covariates
-  cov_values = do.call(cbind,lapply(covariate_list, function(x) extract(x, xyt[,.(longitude, latitude)])))
+  cov_values = do.call(cbind,lapply(covariate_list, function(x) raster::extract(x, xyt[,.(longitude, latitude)])))
 
   #combine them
   xyt = cbind(xyt, cov_values)
