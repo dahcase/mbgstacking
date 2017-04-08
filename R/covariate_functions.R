@@ -1,10 +1,3 @@
-#Daniel Casey
-#Created: 2-24-2017
-#Purpose: Functions that prepare the data to be put through the stacking ensemble
-#------------------------------------------------------------------------------#
-##functions in this file
-#extract_covariates
-
 #' Extract Covariate Values
 #'
 #' Given a SpatialPointsDataFrame, this function extracts values at the intersection

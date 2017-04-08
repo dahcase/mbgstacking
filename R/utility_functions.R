@@ -1,5 +1,12 @@
 #Stacking Data Munging
-
+#' Format covariate equation
+#'
+#' Splits a formula like string into a vector where each item is a term
+#'
+#' @param covariates a formula-like string
+#' @return A vector where each item is a term in the formula
+#' @import data.table
+#'
 #convert an equation into its consituent parts
 format_covariates = function(covariates){
   if(length(covariates)==1){
@@ -10,20 +17,51 @@ format_covariates = function(covariates){
   return(covariates)
 }
 
-#add additional terms to the covariate list
+#' Add additional terms to the covariate equation
+#'
+#'
+#' @param fes original equation
+#' @param add_terms a vector of new terms to add to the covariate equation
+#' @return the covariate/fixed effects equation with additional terms tacked on
+#'
+#convert an equation into its consituent parts
 add_additional_terms= function(fes, add_terms = NULL){
   new_list = paste(unlist(sapply(c(fes, add_terms), function(x) format_covariates(x))), collapse = ' + ')
   return(new_list)
 }
-
+#' Format Model Covariates
+#'
+#' Returns the covariate equation as a vector with each item as a term of the equation with additional terms appended on
+#'
+#' @param covariates a formula-like string
+#' @param additional_terms a string vector of new terms
+#' @return A vector where each item is a term in the formula
+#'
+#convert an equation into its consituent parts
 format_model_covs = function(covariates, additional_terms){
   return(format_covariates(add_additional_terms(covariates, additional_terms)))
 }
 
+#' Get Model Type
+#'
+#' Returns the model type/class from the stacker object given a model name
+#'
+#' @param st stacker object
+#' @param model_name character string of the model name
+#' @return A string with the model type
+#' @import data.table
+#'
 get_model_type = function(st, model_name){
   st[['models']][[model_name]][['model_type']]
 }
 
+#' Sanitize paramers
+#'
+#' Given a list of lists (e.g. parameters guiding a stacker child model), remove all the NULL entries
+#'
+#' @param x a subset of the stacker object
+#' @return subset of the stacker object (e.g. list of lists) with no null entries
+#'
 sanitize_parameters =function(x){
   x = x[!sapply(x, is.null)]
   return(x)
