@@ -1,7 +1,16 @@
-#Daniel Casey
-#Created: 2-24-2017
-#Purpose: Functions involved in fitting earth (multivariate adaptive regression spline) models
-#------------------------------------------------------------------------------#
+#' Fit an Earth model
+#'
+#' Fit a multivariate regression spline model using earth::earth. See earth for more details.
+#'
+#' @param st stacker governer. Stacking governer object with an earth model initialized
+#' @param model_name character vector. Name of the model to be run
+#' @param fold_col character vector. Denotes the name of the column designating the fold for crossval
+#' @param fold_id Numeric. Designates the value in fold col that should be held out
+#' @param return_model_obj logical. Denotes whether the function should return the earth object or just predictions.
+#' @return List object with a data.table of predictions. If return_model_obj==T, the earth command and model object are returned as well
+#' @import data.table
+#' @import earth
+#'
 fit_earth = function(st, model_name = 'earth',fold_col = NULL, fold_id = NULL, return_model_obj = F){
 
   #subset the model parameters we need

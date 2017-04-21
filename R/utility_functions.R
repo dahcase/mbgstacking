@@ -55,7 +55,7 @@ get_model_type = function(st, model_name){
   st[['models']][[model_name]][['model_type']]
 }
 
-#' Sanitize paramers
+#' Sanitize parameters
 #'
 #' Given a list of lists (e.g. parameters guiding a stacker child model), remove all the NULL entries
 #'
@@ -66,6 +66,20 @@ sanitize_parameters =function(x){
   x = x[!sapply(x, is.null)]
   return(x)
 }
+
+#' Emperical logit
+#'
+#' Given two vectors (success and N), calculate the emperical logistc. This is used to deal with cases when success/N
+#' equals 0 or 1.
+#'
+#' This stack exchange explains the process: http://stats.stackexchange.com/questions/109702/empirical-logit-transformation-on-percentage-data
+#'
+#' @param success numeric vector. Binomial successes
+#' @param N numeric vector. Same length as success. Represents the number of binomial trials
+#' @param epsilon numeric. Offset value for instances where success/N are equal to 0 or 1. If left NULL, the function defaults to 1/2 the minimum observed value
+#' @import data.table
+#' @export
+#'
 
 emplogit = function(success, N, epsilon = NULL) {
   #http://stats.stackexchange.com/questions/109702/empirical-logit-transformation-on-percentage-data
@@ -84,8 +98,13 @@ emplogit = function(success, N, epsilon = NULL) {
   return(tform)
 }
 
-#find binary variables
-#takes a data frame and returns the the names of binary variables
+#' Find binary variables
+#'
+#' Given a data table, returns the names of the columns that have two or fewer responses.
+#'
+#' @param df A data table.
+#' @import data.table
+#'
 find_binary = function(df){
   df = as.data.table(df)
   n_uniq_vals = setNames(lapply(names(df), function(x) uniqueN(df[!is.na(get(x)),x,with=F])),names(df))
@@ -94,11 +113,17 @@ find_binary = function(df){
   return(binary_vars)
 }
 
-#make folds for stacking
-#numrows: number of data points/rows in the analytical dataset
-#numfolds: number of folds within a set
-#numsets: number of sets of folds
-make_stacking_folds = function(numrows, numfolds = 8, numsets = 1, all_fold = T){
+#' Make stacking folds
+#'
+#' Assigns rows to different folds to support the cross validation inherent in stacking.
+#'
+#' @param numrows numeric. The number of data points/rows in the dataset
+#' @param numfolds numeric. The number of folds within a set
+#' @param numsets numeric. The number of fold sets to return
+#' @import data.table
+#'
+
+make_stacking_folds = function(numrows, numfolds = 8, numsets = 1){
   fold_id = lapply(1:numsets, function(x) sample(cut(1:numrows,breaks=as.numeric(numfolds),labels=FALSE)))
   names(fold_id) = paste0('sfold_', 1:numsets)
 
@@ -110,11 +135,24 @@ make_stacking_folds = function(numrows, numfolds = 8, numsets = 1, all_fold = T)
   return(data.frame(fold_id))
 }
 
-# A function to ensure an object has certain names
+#' Check names
+#'
+#' Ensure an object has certain names. Written as a test rather than something that returns T/F
+#'
+#' @param obj any object with a names attribute.
+#' @param required_names character vector. The names an object must have to pass the test
+#'
+
 check_names = function(obj, required_names){
   stopifnot(sum(names(obj) %in% required_names)==length(required_names))
 }
 
+#' Parse spline arguments
+#'
+#' Assigns rows to different folds to support the cross validation inherent in stacking.
+#'
+#' @param l named list. A named list that when deconstructed can be used to tell mgcv:gam what to do
+#'
 parseArgsS <- function(l) {
   # parse a list of additional arguments to smoothers in gamTrans
   stopifnot(is.list(l))
@@ -125,6 +163,15 @@ parseArgsS <- function(l) {
   return (l_string)
 }
 
+#' Build Parameter Grid
+#'
+#' Given a set of paramters (e.g. named list). Returns a data frame where each row is a set of parameters to inform
+#' a given model
+#'
+#' @param ... ... Named list of parameters
+#' @param grid_type character vector. One of ordered, none or all. None returns the first value for each set of parameters,
+#' ordered returns a data frame where each row refers to the position as passed and all returns all combinations.
+#'
 build_parameter_grid = function(..., grid_type = 'ordered', model_type = NULL){
 
   model_params = list(...)
@@ -140,8 +187,16 @@ build_parameter_grid = function(..., grid_type = 'ordered', model_type = NULL){
 
 }
 
-#make test and train rows
-make_test_train = function(data, fold_col, fold_id){
+#' Make Test and Train identifiers
+#'
+#' Assigns rows to test/train designations depending on fold_col/fold_id combination. If null, test and train are the entire dataset.
+#'
+#' @param data data.table. Dataset to be split into test and train. Requires a column called 'rid' which is the row id.
+#' @param fold_col character vector. Name of a column in data from which the test/train split should be made
+#' @param fold_id numeric vector. Value designating which rows (given fold_col) should be left out.
+#' @import data.table
+#'
+make_test_train = function(data, fold_col =NULL, fold_id=NULL){
   #mark which rows need to be included and which don't (e.g. test and train)
   if(is.null(fold_col)) fold_col = NA
   if(is.null(fold_id)) fold_id = NA

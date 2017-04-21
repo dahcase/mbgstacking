@@ -2,7 +2,7 @@
 % Please edit documentation in R/utility_functions.R
 \name{sanitize_parameters}
 \alias{sanitize_parameters}
-\title{Sanitize paramers}
+\title{Sanitize parameters}
 \usage{
 sanitize_parameters(x)
 }
