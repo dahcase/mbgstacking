@@ -1,6 +1,6 @@
 #' Fit penalized regression model
 #'
-#' Fit a glm or penalized glm using h2o::h2o.glm. See help(h2o.glm) for more details
+#' Fit a glmnet:glmnet. See help(glmnet) for more details
 #'
 #' @param st stacker governer. Stacking governer object with a penalized model initialized
 #' @param model_name character vector. Name of the model to be run

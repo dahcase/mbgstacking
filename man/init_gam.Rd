@@ -10,7 +10,7 @@ init_gam(model_name = "gam", arguments = list(spline_args = list(bs = "ts",
 \arguments{
 \item{model_name}{name of the gam model}
 
-\item{arguments}{named list. Arguments to be passed to the earth function. See help mgcv::gam for more information}
+\item{arguments}{named list. Arguments to be passed to the gan function. See help mgcv::gam for more information}
 
 \item{formula}{formula or formula-like. Formula to be passed to the gam call that overwrites the underlying formula builder.
 This is useful if you want to have different covariates recieve different smoothing instructions}

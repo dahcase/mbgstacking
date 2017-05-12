@@ -103,7 +103,7 @@ init_earth = function(model_name = 'earth', arguments = list(degree = NULL, nk =
 #' Creates an object designed to be passed to init_stacker that describes an gam model be added to the stacking ensemble.
 #'
 #' @param model_name name of the gam model
-#' @param arguments named list. Arguments to be passed to the earth function. See help mgcv::gam for more information
+#' @param arguments named list. Arguments to be passed to the gan function. See help mgcv::gam for more information
 #' @param formula formula or formula-like. Formula to be passed to the gam call that overwrites the underlying formula builder.
 #' This is useful if you want to have different covariates recieve different smoothing instructions
 #' @return named list of lists with the parameters required to run an gam model
@@ -115,6 +115,25 @@ init_gam = function(model_name = 'gam',  arguments = list(spline_args = list(bs 
 }
 
 #init brt
+#' Initialize a brt model
+#'
+#' Creates an object designed to be passed to init_stacker that describes an brt model be added to the stacking ensemble.
+#'
+#' @param model_name name of the brt model
+#' @param arguments named list. Arguments to be passed to the brt function.
+#'                              Should only be used for options not captured by the params argument in the underlying xgboost function call.
+#'                              See help xgboost::xgb.train for more information
+#' @param params_arg named list. Arguments to be passed to the parameters argument of the xgboost::xgb.train function
+#' @param nrounds numeric. Max number of iterations
+#' @param emp_logit logical. Whether a binomial model should be be transformed using an emperical logit function instead of using the poisson approximation.
+#'                           xgboost's binomial approach is exclusive to 1s and 0s
+#' @return named list of lists with the parameters required to run an brt model
+#' @export
+#'
+init_brt = function(model_name = 'brt',  arguments = list(), params_arg = list(nthread = 1), nrounds = 10, emp_logit = F){
+  model = list(model_name = model_name, model_type = 'xgb.train', args = arguments, params_arg = params_arg, nrounds = nrounds, emp_logit = emp_logit)
+  return(model)
+}
 
 #init rf
 

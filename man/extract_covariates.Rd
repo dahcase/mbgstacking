@@ -16,7 +16,7 @@ extract_covariates(xyt, covariate_list, centre_scale = T, time_var = "year",
 
 \item{time_var}{Character. Column in the dataset representing the time. Should be matched with the bricks}
 
-\item{build_time_scale}{Numeric Vector. Denotes the full range of times under analysis.
+\item{time_scale}{Numeric Vector. Denotes the full range of times under analysis.
 For example, if we are analyzing yearly from 2000-2015, the
 the vector should be 2000:2015. if specified, this will be used
 to translate between actual time and the suffixes of the covariates.

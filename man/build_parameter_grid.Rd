@@ -4,7 +4,7 @@
 \alias{build_parameter_grid}
 \title{Build Parameter Grid}
 \usage{
-build_parameter_grid(..., grid_type = "ordered", model_type = NULL)
+build_parameter_grid(..., grid_type = "ordered")
 }
 \arguments{
 \item{...}{... Named list of parameters}

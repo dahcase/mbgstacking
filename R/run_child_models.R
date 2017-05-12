@@ -3,7 +3,7 @@
 #' Fits all models specified in the passed stacking object. M*C*K + M models are run where M is the number of initialized models,
 #' C is the number of columns/iterations for crossfold validation and K is the number of folds.
 #'
-#' @param st stacker governer. Stacking governer object with a penalized model initialized
+#' @param st stacker governer.
 #' @import data.table
 #' @export
 #'

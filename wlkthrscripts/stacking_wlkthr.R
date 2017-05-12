@@ -13,12 +13,12 @@ em_def = init_earth(model_name = 'em_def')
 #em_chg = init_earth(model_name = 'em_chg', arguments = list(degree = 3, nk = 45))
 gm_def = init_gam(model_name = 'gm_def')
 enet = init_penalized(model_name = 'enet',arguments = list(alpha = 1), emp_logit = F)
-
+brt = init_brt(model_name = 'brt')
 #windows specific alternations
 slots = 1
 
 #create the stacker governor
-stk = init_stacker(enet, gm_def, em_def,#em_def, em_chg, enet, gm_def,
+stk = init_stacker(enet, gm_def, em_def,brt, #em_def, em_chg, enet, gm_def,
                    data = the_data,
                    indicator = indicator,
                    indicator_family = indicator_family,
@@ -31,4 +31,9 @@ stk = init_stacker(enet, gm_def, em_def,#em_def, em_chg, enet, gm_def,
                    cores = slots)
 
 herp = run_stacking_child_models(stk)
+
+
+#st = stk
+#fold_col = NULL; fold_id = NULL; return_model_obj = F; sub_cores = 1
+#model_name = 'brt'
 

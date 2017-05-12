@@ -2,6 +2,7 @@
 
 export(emplogit)
 export(extract_covariates)
+export(init_brt)
 export(init_earth)
 export(init_gam)
 export(init_penalized)

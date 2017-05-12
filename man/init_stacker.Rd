@@ -36,8 +36,6 @@ of covariate_layers.}
 \item{num_folds}{numeric. The number of folds the data is split on.}
 
 \item{cores}{numeric. The number of cores available for computation}
-
-\item{return_model_obj}{logical. Denotes whether the function should return the earth object or just predictions.}
 }
 \value{
 Stacker governor object
