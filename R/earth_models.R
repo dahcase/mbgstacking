@@ -9,12 +9,13 @@
 #' @param return_model_obj logical. Denotes whether the function should return the earth object or just predictions.
 #' @return List object with a data.table of predictions. If return_model_obj==T, the earth command and model object are returned as well
 #' @import data.table
-#' @import earth
 #'
 fit_earth = function(st, model_name = 'earth',fold_col = NULL, fold_id = NULL, return_model_obj = F){
 
   #subset the model parameters we need
   earth_params = st$models[[model_name]]
+  indicator_family = st$general_settings$indicator_family
+  indicator = st$general_settings$indicator
 
   #get test and train
   tetr = make_test_train(st$data, fold_col = fold_col, fold_id = fold_id)
@@ -33,7 +34,7 @@ fit_earth = function(st, model_name = 'earth',fold_col = NULL, fold_id = NULL, r
               weights = st$data[tetr$train_rows,data_weight],
               glm = list(family = st$general_settings$indicator_family))
   command = append(command, sanitize_parameters(earth_params$args))
-  mod = do.call(earth, args = command)
+  mod = do.call(earth::earth, args = command)
 
   #create predictions
   output = predict(mod, st$data[tetr$test_rows,st$general_settings$covs, with = F], type = 'response')

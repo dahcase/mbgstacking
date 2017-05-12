@@ -1,4 +1,12 @@
-#Functions to run stacking altogether
+#' Run child models for stacking
+#'
+#' Fits all models specified in the passed stacking object. M*C*K + M models are run where M is the number of initialized models,
+#' C is the number of columns/iterations for crossfold validation and K is the number of folds.
+#'
+#' @param st stacker governer. Stacking governer object with a penalized model initialized
+#' @import data.table
+#' @export
+#'
 run_stacking_child_models = function(st){
 
   #build the grid to govern the mclapply call
@@ -13,11 +21,8 @@ run_stacking_child_models = function(st){
 
   model_grid = rbind(model_grid,main_mods, fill = T)
 
-  #open h2o for those models that need it
-  tryCatch(h2o.init(startH2O=FALSE),finally = h2o.init(nthreads = st$general_settings$cores, max_mem_size = paste0(cores*2, "G")))
-
   #run the models
-  stacking_models = mclapply(1:nrow(model_grid),
+  stacking_models = parallel::mclapply(1:nrow(model_grid),
                     function(x) get(paste0('fit_',get_model_type(st, model_grid[x,model_name])))(
                       st = st,
                       model_name = model_grid[x,model_name],

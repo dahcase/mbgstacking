@@ -2,6 +2,9 @@
 
 export(emplogit)
 export(extract_covariates)
+export(init_earth)
+export(init_gam)
+export(init_penalized)
+export(init_stacker)
+export(run_stacking_child_models)
 import(data.table)
-import(earth)
-import(mgcv)

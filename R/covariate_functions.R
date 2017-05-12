@@ -7,7 +7,7 @@
 #' @param covariate_list List. A list of raster-like objects holding covariate values.
 #' @param centre_scale Logical. Should the covariate values be centered?
 #' @param time_var Character. Column in the dataset representing the time. Should be matched with the bricks
-#' @param build_time_scale Numeric Vector. Denotes the full range of times under analysis.
+#' @param time_scale Numeric Vector. Denotes the full range of times under analysis.
 #'                  For example, if we are analyzing yearly from 2000-2015, the
 #'                  the vector should be 2000:2015. if specified, this will be used
 #'                  to translate between actual time and the suffixes of the covariates.
@@ -55,19 +55,19 @@ extract_covariates = function(xyt, covariate_list, centre_scale = T, time_var = 
   tv_cov_col_names = lapply(tv_cov_col_names_uniq, function(x) grep(x, tv_cov_col_names, value = T))
 
   #melt
-  xyt = melt(xyt, id.vars = idv,
+  xyt = data.table::melt(xyt, id.vars = idv,
             measure = tv_cov_col_names, value.name = tv_cov_col_names_uniq, variable.factor =F)
 
   #keep only rows where there is data time/covariate time agreement
   xyt = xyt[time_id == variable ,]
 
   #subset so that only the covariate columns are kept
-  setorder(xyt, rid)
+  data.table::setorder(xyt, rid)
   xyt = data.table(xyt[,names(covariate_list), with =F])
 
 
   #center scale the result if requested
-  xyt = data.table(xyt[,names(covariate_list), with =F])
+  xyt = data.table::data.table(xyt[,names(covariate_list), with =F])
 
   if(centre_scale){
     cs_df = getCentreScale(xyt, exclude = find_binary(xyt))

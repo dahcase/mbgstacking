@@ -8,6 +8,7 @@
 #' @import data.table
 #'
 #convert an equation into its consituent parts
+
 format_covariates = function(covariates){
   if(length(covariates)==1){
     #split back into parts
@@ -127,11 +128,6 @@ make_stacking_folds = function(numrows, numfolds = 8, numsets = 1){
   fold_id = lapply(1:numsets, function(x) sample(cut(1:numrows,breaks=as.numeric(numfolds),labels=FALSE)))
   names(fold_id) = paste0('sfold_', 1:numsets)
 
-  #generate an all fold
-  if(all_fold){
-    fold_id = cbind(data.frame(sfold_0 = rep(1, numrows)), fold_id)
-  }
-
   return(data.frame(fold_id))
 }
 
@@ -172,7 +168,7 @@ parseArgsS <- function(l) {
 #' @param grid_type character vector. One of ordered, none or all. None returns the first value for each set of parameters,
 #' ordered returns a data frame where each row refers to the position as passed and all returns all combinations.
 #'
-build_parameter_grid = function(..., grid_type = 'ordered', model_type = NULL){
+build_parameter_grid = function(..., grid_type = 'ordered'){
 
   model_params = list(...)
 
@@ -212,4 +208,24 @@ make_test_train = function(data, fold_col =NULL, fold_id=NULL){
   }
 
   return(list(train_rows = train_rows, test_rows = test_rows))
+}
+
+#' Logit transformation
+#'
+#' Given a numeric vector, the function applies the logit transformation: log(x/(1-x))
+#'
+#' @param x numeric vector.
+#'
+logit <- function(x) {
+  log(x/(1-x))
+}
+
+#' Inverse logit transformation
+#'
+#' Given a numeric vector, the function applies the inverse logit transformation: exp(x)/(1+exp(x))
+#'
+#' @param x numeric vector.
+#'
+invlogit <- function(x) {
+  exp(x)/(1+exp(x))
 }

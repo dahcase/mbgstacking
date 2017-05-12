@@ -43,5 +43,5 @@ of covariate_layers.}
 Stacker governor object
 }
 \description{
-Creates a stacker governor containing the various information and data to run stacked generalizetion
+Creates a stacker governor containing the various information and data to run stacked generalization
 }

@@ -13,7 +13,8 @@ Imports:
     raster,
     earth,
     mgcv,
-    h2o,
+    xgboost,
+    glmnet,
     parallel
 RoxygenNote: 6.0.1
 Suggests: testthat
