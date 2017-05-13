@@ -27,7 +27,7 @@ fit_gam = function(st, model_name = 'gam',fold_col = NULL, fold_id = NULL, retur
 
   #set the response variable
   if(st$general_settings$indicator_family=="binomial"){
-    response <- cbind(success = st$data[tetr$train_rows, get(indicator)], failure = st$data[tetr$train_rows, N] - st$data[tetr$train_rows, get(indicator)])
+    response <- cbind(success = st$data[tetr$train_rows, get(indicator)], failure = st$data[tetr$train_rows, get('N')] - st$data[tetr$train_rows, get(indicator)])
   } else{
     response = st$data[tetr$train_rows,get(st$general_settings$indicator)]
   }
@@ -44,14 +44,14 @@ fit_gam = function(st, model_name = 'gam',fold_col = NULL, fold_id = NULL, retur
     gam_form = paste0('response ~ 1+ ',gam_form)
     if(length(binary_vars)>0) gam_form = paste0(gam_form,' + ', paste(binary_vars, collapse = " + "))
   }
-  gam_form = as.formula(gam_form)
+  gam_form = stats::as.formula(gam_form)
 
   #model call
   command = list(
               gam_form,
               data =st$data[tetr$train_rows, ],
               family = indicator_family,
-              weights = st$data[tetr$train_rows,data_weight])
+              weights = st$data[tetr$train_rows,get('data_weight')])
   command = append(command, sanitize_parameters(gam_params$args))
   mod = do.call(mgcv::gam, args = command)
 

@@ -30,19 +30,19 @@ extract_covariates = function(xyt, covariate_list, centre_scale = T, time_var = 
   xyt = xyt[, c('latitude','longitude',time_var), with = F]
 
   #create a row id
-  xyt = xyt[,rid := 1:nrow(xyt)]
+  xyt = xyt[,('rid') := 1:nrow(xyt)]
 
   #extract the covariates
-  cov_values = do.call(cbind,lapply(covariate_list, function(x) raster::extract(x, xyt[,.(longitude, latitude)])))
+  cov_values = do.call(cbind,lapply(covariate_list, function(x) raster::extract(x, xyt[, c('longitude', 'latitude'), with = F])))
 
   #combine them
   xyt = cbind(xyt, cov_values)
 
   #create a column to interface with the covariate suffixes (namely period format)
   if(!is.null(time_scale)){
-    xyt[,time_id := match(get(time_var), time_scale)]
+    xyt[,('time_id') := match(get(time_var), time_scale)]
   } else{
-    xyt[,time_id := get(time_var)]
+    xyt[,('time_id') := get(time_var)]
   }
 
   #extract the column names of time varying covariates and their corrosponding stems
@@ -59,10 +59,10 @@ extract_covariates = function(xyt, covariate_list, centre_scale = T, time_var = 
             measure = tv_cov_col_names, value.name = tv_cov_col_names_uniq, variable.factor =F)
 
   #keep only rows where there is data time/covariate time agreement
-  xyt = xyt[time_id == variable ,]
+  xyt = xyt[get('time_id') == get('variable') ,]
 
   #subset so that only the covariate columns are kept
-  data.table::setorder(xyt, rid)
+  data.table::setorderv(xyt, 'rid')
   xyt = data.table(xyt[,names(covariate_list), with =F])
 
 

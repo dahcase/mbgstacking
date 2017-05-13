@@ -27,21 +27,21 @@ fit_xgb.train= function(st, model_name = 'brt',fold_col = NULL, fold_id = NULL, 
       response_var = as.matrix(emplogit(st$data[tetr$train_rows,get(indicator)], st$data[tetr$train_rows,N]))
       dm = xgboost::xgb.DMatrix(data = as.matrix(st$data[tetr$train_rows, st$general_settings$covs, with = F]),
                        label = response_var,
-                       weight = as.matrix(st$data[tetr$train_rows,data_weight]))
+                       weight = as.matrix(st$data[tetr$train_rows,get('data_weight')]))
       indicator_family = 'gaussian'
     } else{
       dm = xgboost::xgb.DMatrix(data = as.matrix(st$data[tetr$train_rows, st$general_settings$covs, with = F]),
                        label = as.matrix(st$data[tetr$train_rows, indicator, with = F]),
-                       weight = as.matrix(st$data[tetr$train_rows,data_weight]))
+                       weight = as.matrix(st$data[tetr$train_rows,get('data_weight')]))
       #add the log offset
-      setinfo(dm, "base_margin", log(st$data[tetr$train_rows, N]))
+      xgboost::setinfo(dm, "base_margin", log(st$data[tetr$train_rows, get('N')]))
       indicator_family = 'poisson'
     }
 
   }else{
     dm = xgboost::xgb.DMatrix(data = as.matrix(st$data[tetr$train_rows, st$general_settings$covs, with = F]),
                      label = as.matrix(st$data[tetr$train_rows, indicator, with = F]),
-                     weight = as.matrix(st$data[tetr$train_rows,data_weight]))
+                     weight = as.matrix(st$data[tetr$train_rows,get('data_weight')]))
   }
 
   #sort out the objective

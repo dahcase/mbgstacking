@@ -45,7 +45,7 @@ init_stacker = function(..., data, indicator, indicator_family, covariate_layers
   govner = structure(list(general_settings = general_settings), class = 'stacker_governor')
 
   #init dataset
-  govner$data = copy(data)
+  govner$data = data.table::copy(data)
 
   #make fold columns
   folds = make_stacking_folds(nrow(govner$data), numfolds = num_folds, numsets = num_fold_cols)
@@ -64,7 +64,7 @@ init_stacker = function(..., data, indicator, indicator_family, covariate_layers
 
   #omit missing rows and make row ids
   govner$data = na.omit(govner$data, cols = govner$general_settings$covs)
-  govner$data[,rid := 1:nrow(govner$data)]
+  govner$data[,('rid') := 1:nrow(govner$data)]
 
   #add to general settings
   govner$general_settings$fold_cols = names(folds)
@@ -72,9 +72,9 @@ init_stacker = function(..., data, indicator, indicator_family, covariate_layers
 
   #set up the weight column
   if(!is.null(weight_col)){
-    govner$data[,data_weight := govner$data[,get(weight_col)]]
+    govner$data[,('data_weight') := govner$data[,get(weight_col)]]
   } else {
-    govner$data[,data_weight := 1]
+    govner$data[,('data_weight') := 1]
   }
 
   ##add the objects

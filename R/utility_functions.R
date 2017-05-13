@@ -108,7 +108,7 @@ emplogit = function(success, N, epsilon = NULL) {
 #'
 find_binary = function(df){
   df = as.data.table(df)
-  n_uniq_vals = setNames(lapply(names(df), function(x) uniqueN(df[!is.na(get(x)),x,with=F])),names(df))
+  n_uniq_vals = stats::setNames(lapply(names(df), function(x) uniqueN(df[!is.na(get(x)),x,with=F])),names(df))
   binary_vars = names(n_uniq_vals[n_uniq_vals<=2])
 
   return(binary_vars)
@@ -199,11 +199,11 @@ make_test_train = function(data, fold_col =NULL, fold_id=NULL){
 
   if(!is.na(fold_col)){
     if(!is.na(fold_id)){
-      train_rows = data[get(fold_col) != fold_id,rid]
-      test_rows = data[get(fold_col) == fold_id, rid]
+      train_rows = data[get(fold_col) != fold_id,get('rid')]
+      test_rows = data[get(fold_col) == fold_id, get('rid')]
     }
   } else{
-    train_rows = data[,rid]
+    train_rows = data[,get('rid')]
     test_rows = train_rows
   }
 
@@ -228,4 +228,95 @@ logit <- function(x) {
 #'
 invlogit <- function(x) {
   exp(x)/(1+exp(x))
+}
+
+#' Center (e.g. normalize) data
+#'
+#' @param x data frame.
+#' @param exclude character vector. List of columns in x to ignore (e.g. leave unstandardized)
+#' @param na.rm logical. na.rm setting for colmeans and sd.
+#'
+getCentreScale <- function (x, exclude = NULL, na.rm = TRUE) {
+  # get dataframe of centreing and scaling values to convert x
+  # to the standard normal. exclude is an optional character vector
+  # giving column names to exclude from scaling
+
+  # get means and SDs for all columns
+  df <- data.frame(name = colnames(x),
+                   mean = colMeans(x, na.rm = na.rm),
+                   sd = apply(x, 2, stats::sd, na.rm = na.rm))
+  rownames(df) <- NULL
+
+  # replace any zero standard deviations with 1
+  # to avoid divide-by-zero errors
+  df$sd[df$sd == 0] <- 1
+
+  # if any named covariates are to be excluded, set mean to 0 and sd to 1
+  if (!is.null(exclude)) {
+    idx <- match(exclude, df$name)
+    df$mean[idx] <- 0
+    df$sd[idx] <- 1
+  }
+
+  return (df)
+}
+
+#' Center (e.g. normalize) data
+#'
+#' @param x data frame (or similiar). The data object
+#' @param df data frame. data frame providing mean and standard deviations from getCentreScale
+#' @param inverse logical. If T, x is unscaled rather than scaled/normalized
+#'
+centreScale <- function (x, df, inverse = FALSE) {
+  # apply pre-calculated centreing/scaling to matrix x,
+  # with fixed dataframe of means/sds df
+  # or uncentre/unscale if inverse = TRUE
+
+  # get the centreing/scaling dataframe if not available
+  if (is.null(df))
+    df <- getCentreScale(x)
+
+  # get index to match up values with column names
+  names <- colnames(x)
+  idx <- match(names, df$name)
+
+  if (any(is.na(idx))) {
+    stop ('could not match up column names with the values in df')
+  }
+
+  df <- df[idx, ]
+
+  # apply transformations
+  if (!inverse) {
+    # move to standard normal
+
+    # centre
+    x <- sweep(x, MARGIN = 2, STATS = df$mean, FUN = '-')
+    # scale
+    x <- sweep(x, MARGIN = 2, STATS = df$sd, FUN = '/')
+
+  } else {
+    # inverse case, move from standard normal to original
+
+    # unscale
+    x <- sweep(x, MARGIN = 2, STATS = df$sd, FUN = '*')
+    # uncentre
+    x <- sweep(x, MARGIN = 2, STATS = df$mean, FUN = '+')
+
+  }
+
+  return (x)
+
+}
+
+#' Add quotes
+#'
+#' @param x character string. Object to add quotes around
+#'
+addQuotes = function (x)
+{
+  if (is.character(x)) {
+    x <- sprintf("\"%s\"", x)
+  }
+  return(x)
 }

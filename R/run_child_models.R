@@ -23,17 +23,17 @@ run_stacking_child_models = function(st){
 
   #run the models
   stacking_models = parallel::mclapply(1:nrow(model_grid),
-                    function(x) get(paste0('fit_',get_model_type(st, model_grid[x,model_name])))(
+                    function(x) get(paste0('fit_',get_model_type(st, model_grid[x,get('model_name')])))(
                       st = st,
                       model_name = model_grid[x,model_name],
                       fold_col = model_grid[x,fold_columns],
                       fold_id = model_grid[x,fold_ids],
-                      return_model_obj = model_grid[x,return_model_obj]),
+                      return_model_obj = model_grid[x,get('return_model_obj')]),
                       mc.cores = st$general_settings$cores)
     #set the names
-    names(stacking_models) = paste(model_grid[,model_name],
-                                   model_grid[,fold_columns],
-                                   model_grid[,fold_ids], sep = ".")
+    names(stacking_models) = paste(model_grid[,get('model_name')],
+                                   model_grid[,get('fold_columns')],
+                                   model_grid[,get('fold_ids')], sep = ".")
     #format the results to be in the full model cv model and the model objs
 
     #split predictions and model objects
@@ -60,7 +60,7 @@ run_stacking_child_models = function(st){
     #create return dataset with full predictions and cv predictions
     all_preds = cbind(preds[,paste0(names(st$models),'_full_pred'),with =F],cv_preds)
     #add rid
-    all_preds = cbind(st$data[,.(rid)], all_preds)
+    all_preds = cbind(st$data[,'rid', with = F], all_preds)
     #fix model names
     names(model_objs) = names(st$models)
 

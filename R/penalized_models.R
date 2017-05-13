@@ -22,14 +22,14 @@ fit_glmnet= function(st, model_name = 'pen',fold_col = NULL, fold_id = NULL, ret
     #message('emplogit')
     #df[, y := emplogit(get(indicator), N)]
     if(pen_params$emp_logit){
-      response_var = as.matrix(emplogit(st$data[,get(indicator)], st$data[,N]))
+      response_var = as.matrix(emplogit(st$data[,get(indicator)], st$data[,get('N')]))
       indicator_family = 'gaussian'
     }else{
       #work with binomial in the traditional way
       response_var = cbind(failure = (st$data[,N]-st$data[,get(indicator)]), success = st$data[,get(indicator)])
     }
   } else{
-    response_var = as.matrix(df[,get(indicator)])
+    response_var = as.matrix(st$data[,get(indicator)])
   }
 
   #make set and train
@@ -50,7 +50,7 @@ fit_glmnet= function(st, model_name = 'pen',fold_col = NULL, fold_id = NULL, ret
   command = list(
               x = dm,
               y = response_var[tetr$train_rows,],
-              weights = st$data[tetr$train_rows,data_weight],
+              weights = st$data[tetr$train_rows,get('data_weight')],
               family = indicator_family)
   command = append(command, sanitize_parameters(pen_params$args))
 
@@ -64,7 +64,7 @@ fit_glmnet= function(st, model_name = 'pen',fold_col = NULL, fold_id = NULL, ret
   output = predict(mod, newx = newdata, s = cv_res$lambda.1se, type = 'link')
   if(indicator_family == 'binomial' | pen_params$emp_logit == T) output = invlogit(output)
 
-  output = data.table(rid = tetr$test_rows, prediction = output)
+  output = data.table::data.table(rid = tetr$test_rows, prediction = output)
 
   #fix names
   names(output) = c('rid', paste0(model_name,".",fold_col,".",fold_id))

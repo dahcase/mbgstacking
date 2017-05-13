@@ -22,7 +22,7 @@ fit_earth = function(st, model_name = 'earth',fold_col = NULL, fold_id = NULL, r
 
   #set the response variable
   if(st$general_settings$indicator_family=="binomial"){
-    response <- cbind(success = st$data[tetr$train_rows, get(indicator)], failure = st$data[tetr$train_rows, N] - st$data[tetr$train_rows, get(indicator)])
+    response <- cbind(success = st$data[tetr$train_rows, get(indicator)], failure = st$data[tetr$train_rows, get('N')] - st$data[tetr$train_rows, get(indicator)])
   } else{
     response = st$data[tetr$train_rows,get(st$general_settings$indicator)]
   }
@@ -31,7 +31,7 @@ fit_earth = function(st, model_name = 'earth',fold_col = NULL, fold_id = NULL, r
   command = list(
               x = st$data[tetr$train_rows, st$general_settings$covs, with = F],
               y = response,
-              weights = st$data[tetr$train_rows,data_weight],
+              weights = st$data[tetr$train_rows,get('data_weight')],
               glm = list(family = st$general_settings$indicator_family))
   command = append(command, sanitize_parameters(earth_params$args))
   mod = do.call(earth::earth, args = command)
