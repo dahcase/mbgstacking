@@ -10,6 +10,7 @@
 #' @param sub_cores numeric. Number of cores/processes to be used by xgboost.
 #' @return List object with a data.table of predictions. If return_model_obj==T, the gam command and model object are returned as well
 #' @import data.table
+#' @importFrom stats predict
 #'
 fit_xgb.train= function(st, model_name = 'brt',fold_col = NULL, fold_id = NULL, return_model_obj = F, sub_cores = 1){
 
@@ -24,7 +25,7 @@ fit_xgb.train= function(st, model_name = 'brt',fold_col = NULL, fold_id = NULL, 
   #make the train xgb.DMatrix
   if(indicator_family == 'binomial' | indicator_family == 'poisson'){
     if(brt_params$emp_logit){
-      response_var = as.matrix(emplogit(st$data[tetr$train_rows,get(indicator)], st$data[tetr$train_rows,N]))
+      response_var = as.matrix(emplogit(st$data[tetr$train_rows,get(indicator)], st$data[tetr$train_rows,get('N')]))
       dm = xgboost::xgb.DMatrix(data = as.matrix(st$data[tetr$train_rows, st$general_settings$covs, with = F]),
                        label = response_var,
                        weight = as.matrix(st$data[tetr$train_rows,get('data_weight')]))

@@ -1,4 +1,4 @@
 library(testthat)
 library(mbgstacking)
 
-test_check("mbgstacking")
+#test_check("mbgstacking")

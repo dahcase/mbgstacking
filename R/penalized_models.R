@@ -9,6 +9,7 @@
 #' @param return_model_obj logical. Denotes whether the function should return the earth object or just predictions.
 #' @return List object with a data.table of predictions. If return_model_obj==T, the gam command and model object are returned as well
 #' @import data.table
+#' @importFrom stats predict
 #'
 fit_glmnet= function(st, model_name = 'pen',fold_col = NULL, fold_id = NULL, return_model_obj = F){
 
@@ -26,7 +27,7 @@ fit_glmnet= function(st, model_name = 'pen',fold_col = NULL, fold_id = NULL, ret
       indicator_family = 'gaussian'
     }else{
       #work with binomial in the traditional way
-      response_var = cbind(failure = (st$data[,N]-st$data[,get(indicator)]), success = st$data[,get(indicator)])
+      response_var = cbind(failure = (st$data[,get('N')]-st$data[,get(indicator)]), success = st$data[,get(indicator)])
     }
   } else{
     response_var = as.matrix(st$data[,get(indicator)])

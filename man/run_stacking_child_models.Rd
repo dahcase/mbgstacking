@@ -7,7 +7,7 @@
 run_stacking_child_models(st)
 }
 \arguments{
-\item{st}{stacker governer. Stacking governer object with a penalized model initialized}
+\item{st}{stacker governer.}
 }
 \description{
 Fits all models specified in the passed stacking object. M*C*K + M models are run where M is the number of initialized models,

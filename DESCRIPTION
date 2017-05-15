@@ -4,8 +4,8 @@ Title: Stacked generalization ensemble model for model-based geostatistics
 Version: 0.0.0.9000
 Author: Daniel Casey
 Maintainer: Daniel Casey <dccasey@uw.edu>
-Description: A series of functions to implement MBG stacking
-License: What license is it under?
+Description: A series of functions to implement MBG stacking.
+License: For IHME use only.
 Encoding: UTF-8
 LazyData: true
 Imports:

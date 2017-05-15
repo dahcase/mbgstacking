@@ -18,6 +18,7 @@
 #' @param cores numeric. The number of cores available for computation
 #' @return Stacker governor object
 #' @import data.table
+#' @importFrom stats na.omit
 #' @export
 #'
 init_stacker = function(..., data, indicator, indicator_family, covariate_layers, fe_equation, centre_scale = T, time_var = 'year',
