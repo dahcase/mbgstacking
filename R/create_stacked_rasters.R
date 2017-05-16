@@ -39,7 +39,7 @@ make_all_children_rasters = function(st, model_objects, time_points = NULL){
   #make row ids on the child ras grid
   child_ras_grid = child_ras_grid[,('rid') := 1:.N]
   raster_objects = setNames(lapply(unique(child_ras_grid[,get('models')]), #for each model
-                                          function(x) brick(raster_objects[child_ras_grid[get('models') == x, get('rid')]])),
+                                          function(x) raster::brick(raster_objects[child_ras_grid[get('models') == x, get('rid')]])),
                             unique(child_ras_grid[,get('models')]))
   #raster_objects = mclapply(1:unique)
   return(raster_objects)
@@ -56,12 +56,12 @@ make_all_children_rasters = function(st, model_objects, time_points = NULL){
 #' @param indicator_family character. Model family
 #' @param cores numeric. Cores available for use
 #' @import data.table
-#' @importFrom stats na.omit predict
+#' @importFrom stats na.omit predict setNames
 #'
 make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NULL, indicator_family = 'binomial',  cores = 1){
 
   #convert rasters into a data table
-  dm = data.table::data.table(raster::as.data.frame(stack(covs), xy = T))
+  dm = data.table::data.table(raster::as.data.frame(raster::stack(covs), xy = T))
 
   #make a row id
   dm = dm[, ('row_id') := 1:.N]
