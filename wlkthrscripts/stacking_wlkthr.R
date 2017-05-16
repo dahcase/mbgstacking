@@ -18,7 +18,7 @@ brt = init_brt(model_name = 'brt')
 slots = 1
 
 #create the stacker governor
-stk = init_stacker(enet, gm_def, em_def,brt, #em_def, em_chg, enet, gm_def,
+steak = init_stacker(enet, gm_def, em_def,brt, #em_def, em_chg, enet, gm_def,
                    data = the_data,
                    indicator = indicator,
                    indicator_family = indicator_family,
@@ -30,7 +30,9 @@ stk = init_stacker(enet, gm_def, em_def,brt, #em_def, em_chg, enet, gm_def,
                    num_folds = 5,
                    cores = slots)
 
-herp = run_stacking_child_models(stk)
+model_results = run_stacking_child_models(steak)
+
+child_ras = make_all_children_rasters(st = steak, model_objects = model_results[[2]], time_points = c(2000, 2005, 2010, 2015))
 
 
 #st = stk

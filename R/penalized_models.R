@@ -58,8 +58,14 @@ fit_glmnet= function(st, model_name = 'pen',fold_col = NULL, fold_id = NULL, ret
   #call cv.glm to get lambda
   cv_res = do.call(glmnet::cv.glmnet, args = command)
 
+  #add lambda chain from cv_res
+  command = append(command, list(lambda = cv_res$lambda))
+
   #fit main model
   mod = do.call(glmnet::glmnet, args = command)
+
+  #add lambda to the model object
+  mod$cv_1se_lambda = cv_res$lambda.1se
 
   #create predictions
   output = predict(mod, newx = newdata, s = cv_res$lambda.1se, type = 'link')

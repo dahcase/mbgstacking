@@ -71,6 +71,10 @@ init_stacker = function(..., data, indicator, indicator_family, covariate_layers
   govner$general_settings$fold_cols = names(folds)
   govner$general_settings$fold_ids = 1:num_folds
 
+  #add time settings
+  govner$general_settings$time_var = time_var
+  govner$general_settings$time_scale = time_scale
+
   #set up the weight column
   if(!is.null(weight_col)){
     govner$data[,('data_weight') := govner$data[,get(weight_col)]]
@@ -83,6 +87,10 @@ init_stacker = function(..., data, indicator, indicator_family, covariate_layers
   for(obj in models){
     govner$models[[obj[['model_name']]]] <- obj
   }
+
+  ##add covariate layer pointers
+  govner$covariate_layers = covariate_layers
+
 
   return(govner)
 }
