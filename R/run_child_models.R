@@ -21,15 +21,20 @@ run_stacking_child_models = function(st){
 
   model_grid = rbind(model_grid,main_mods, fill = T)
 
+  #initialize cluster
+  clus = makeCluster(st$general_settings$cores)
+  clusterEvalQ(clus, 'mbgstacking')
+
   #run the models
-  stacking_models = parallel::mclapply(1:nrow(model_grid),
+  stacking_models = parallel::parLapplyLB(clus, 1:nrow(model_grid),
                     function(x) get(paste0('fit_',get_model_type(st, model_grid[x,get('model_name')])))(
                       st = st,
                       model_name = model_grid[x,get('model_name')],
                       fold_col = model_grid[x,get('fold_columns')],
                       fold_id = model_grid[x,get('fold_ids')],
-                      return_model_obj = model_grid[x,get('return_model_obj')]),
-                      mc.cores = st$general_settings$cores)
+                      return_model_obj = model_grid[x,get('return_model_obj')]))
+  stopCluster(clus)
+
     #set the names
     names(stacking_models) = paste(model_grid[,get('model_name')],
                                    model_grid[,get('fold_columns')],

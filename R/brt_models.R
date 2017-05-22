@@ -81,6 +81,9 @@ fit_xgb.train= function(st, model_name = 'brt',fold_col = NULL, fold_id = NULL, 
   #fix names
   names(output) = c('rid', paste0(model_name,".",fold_col,".",fold_id))
 
+  #convert mod to raw to avoid handle/pointer issues
+  mod = xgboost::xgb.save.raw(mod)
+
 
   if(return_model_obj){
     return(list(output, mod, command))
