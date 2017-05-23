@@ -191,6 +191,7 @@ build_parameter_grid = function(..., grid_type = 'ordered'){
 #' @param fold_col character vector. Name of a column in data from which the test/train split should be made
 #' @param fold_id numeric vector. Value designating which rows (given fold_col) should be left out.
 #' @import data.table
+#' @export
 #'
 make_test_train = function(data, fold_col =NULL, fold_id=NULL){
   #mark which rows need to be included and which don't (e.g. test and train)
