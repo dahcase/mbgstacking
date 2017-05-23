@@ -13,7 +13,7 @@ Imports:
     raster,
     earth,
     mgcv,
-    xgboost,
+    xgboost (>= 0.4),
     glmnet,
     parallel
 RoxygenNote: 6.0.1
