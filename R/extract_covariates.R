@@ -1,19 +1,27 @@
 #' Extract Covariate Values
 #'
-#' Given a SpatialPointsDataFrame, this function extracts values at the intersection
-#' from raster-like objects.
+#' Given a data table with columns for latitude, longitude and some time dimensions, this function extracts values at the intersection of points
+#' (denoted by latitude and longitude) from raster-like objects. From time varying rasters, the function matches the appropriate time using
+#' time_var. extract_covariates accepts either a list of raster-like objects or a raster-like object itself.
+#' Time varying covariates/rasters are infered from the names of the raster like objects by matching the suffix of names(raster_obj)
+#' with the defined time scale. For example, if a raster brick with layer names evi.1, evi.2, evi.3 and evi.4 is passed and the time scale is
+#' 2000,2001,2002, and 2003, the function takes evi.2 to represent 2001.
 #'
-#' @param xyt spatialpointsdataframe. A spdf where raster values should be extracted.
-#' @param covariate_list List. A list of raster-like objects holding covariate values.
-#' @param centre_scale Logical. Should the covariate values be centered?
-#' @param time_var Character. Column in the dataset representing the time. Should be matched with the bricks
+#'
+#' @param xyt data.table. A data frame containing columns for latitude, longitude and some time element (defined by time_var)
+#'                        where raster values should be extracted.
+#' @param covariate_list list or raster-like. A list (or single raster-like object) of raster-like objects. These normally represent covariates.
+#' @param centre_scale Logical. Should the covariate values be centered/normalized? Binary variables are excluded.
+#'                            Binary variables are excluded. Factor variables should be converted into individual rasters using raster::layerize.
+#'                            This is due to computational friendly-ness and that downstream processes don't always play well with factor variables.
+#' @param time_var Character. Column in the dataset representing the time variable.
 #' @param time_scale Numeric Vector. Denotes the full range of times under analysis.
 #'                  For example, if we are analyzing yearly from 2000-2015, the
 #'                  the vector should be 2000:2015. if specified, this will be used
 #'                  to translate between actual time and the suffixes of the covariates.
 #'                  E.g. 2004 would be translated into 5 (as its the fifth position)
-#' @return A spdf with columns of the extracted values from covariate list reconciled by time.
-#'         if centre_scale is T, returns the extracted values after centre-scaling as well as
+#' @return A data table with columns of the extracted values from covariate list reconciled by time.
+#'         If centre_scale is T, returns the extracted values after centre-scaling (normalizing) as well as
 #'         the centre_scale data frame for later use.
 #' @import data.table
 #' @export
@@ -26,14 +34,21 @@ extract_covariates = function(xyt, covariate_list, centre_scale = T, time_var = 
   #check for names
   check_names(xyt, c('latitude','longitude',time_var))
 
+  #if a list, condense to a brick-- outcome should be the same
+  if(class(covariate_list) == 'list'){
+    covariate_list = raster::brick(covariate_list)
+  }
+
   #subset to the three required columns
   xyt = xyt[, c('latitude','longitude',time_var), with = F]
 
   #create a row id
   xyt = xyt[,('rid') := 1:nrow(xyt)]
 
+  #create a variable
+
   #extract the covariates
-  cov_values = do.call(cbind,lapply(covariate_list, function(x) raster::extract(x, xyt[, c('longitude', 'latitude'), with = F])))
+  cov_values = raster::extract(covariate_list, xyt[, c('longitude', 'latitude'), with = F])
 
   #combine them
   xyt = cbind(xyt, cov_values)
@@ -49,7 +64,9 @@ extract_covariates = function(xyt, covariate_list, centre_scale = T, time_var = 
 
   tv_cov_col_names = grep("(\\.[0-9]+)$",names(xyt), value =T)
   idv = names(xyt)[!names(xyt) %in% tv_cov_col_names]
-  tv_cov_col_names_uniq = unique(gsub('.{2}$', '', tv_cov_col_names))
+
+  #remove trailing periods followed by numbers at the end of the string
+  tv_cov_col_names_uniq = unique(gsub('\\.[0-9]*$', '', tv_cov_col_names))
 
   #organize into a list
   tv_cov_col_names = lapply(tv_cov_col_names_uniq, function(x) grep(x, tv_cov_col_names, value = T))
@@ -63,15 +80,15 @@ extract_covariates = function(xyt, covariate_list, centre_scale = T, time_var = 
 
   #subset so that only the covariate columns are kept
   data.table::setorderv(xyt, 'rid')
-  xyt = data.table(xyt[,names(covariate_list), with =F])
 
+  #create names of covariates
+  covnames = unique(gsub('\\.[0-9]*$', '', names(covariate_list)))
 
-  #center scale the result if requested
-  xyt = data.table::data.table(xyt[,names(covariate_list), with =F])
+  xyt = xyt[,covnames, with =F]
 
   if(centre_scale){
     cs_df = getCentreScale(xyt, exclude = find_binary(xyt))
-    xyt = as.data.table(centreScale(xyt, cs_df))
+    xyt = data.table::as.data.table(centreScale(xyt, cs_df))
     return(list(xyt, cs_df))
   } else{
     return(list(xyt))

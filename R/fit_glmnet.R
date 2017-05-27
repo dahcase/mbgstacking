@@ -1,8 +1,8 @@
 #' Fit penalized regression model
 #'
-#' Fit a glmnet:glmnet. See help(glmnet) for more details
+#' Fit a penalized regression model. See ??glmnet::glmnet for more details
 #'
-#' @param st stacker governer. Stacking governer object with a penalized model initialized
+#' @param st stacker governor. Stacking governer object with a penalized model initialized
 #' @param model_name character vector. Name of the model to be run
 #' @param fold_col character vector. Denotes the name of the column designating the fold for crossval
 #' @param fold_id Numeric. Designates the value in fold col that should be held out

@@ -28,8 +28,8 @@ make_all_children_rasters = function(st, model_objects, time_points = NULL){
   stopifnot(nrow(child_ras_grid)>0)
 
   #use parLappyl
-  clus = makeCluster(st$general_settings$cores)
-  clusterEvalQ(clus, 'mbgstacking')
+  clus = parallel::makeCluster(st$general_settings$cores)
+  parallel::clusterEvalQ(clus, 'mbgstacking')
 
   #make rasters from the selected child models
   raster_objects = parallel::parLapply(clus, 1:nrow(child_ras_grid),
@@ -40,7 +40,7 @@ make_all_children_rasters = function(st, model_objects, time_points = NULL){
                               cs_df = st$cs_df,
                               indicator_family = st$general_settings$indicator_family
                               ))
-  stopCluster(clus)
+  parallel::stopCluster(clus)
 
   #create raster bricks
   #make row ids on the child ras grid
@@ -61,7 +61,6 @@ make_all_children_rasters = function(st, model_objects, time_points = NULL){
 #' @param covs a named list of rasters,
 #' @param cs_df center scaling df
 #' @param indicator_family character. Model family
-#' @param cores numeric. Cores available for use
 #' @import data.table
 #' @importFrom stats na.omit predict setNames
 #'
