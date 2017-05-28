@@ -1,8 +1,8 @@
 #' Fit gam model
 #'
-#' Fit a generalized additive model using mgcv::gam. See help(gam) for more details
+#' Fit a generalized additive model using mgcv::gam. See ??gam for more details
 #'
-#' @param st stacker governer. Stacking governer object with an gam model initialized
+#' @param st stacker governor. Stacking governer object with an gam model initialized. See ??mbgstacking::init_gam for more info.
 #' @param model_name character vector. Name of the model to be run
 #' @param fold_col character vector. Denotes the name of the column designating the fold for crossval
 #' @param fold_id Numeric. Designates the value in fold col that should be held out

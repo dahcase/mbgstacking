@@ -9,6 +9,9 @@
 #'
 make_all_children_rasters = function(st, model_objects, time_points = NULL){
 
+  #make sure model_objects is being passed as a list
+  stopifnot(class(model_objects)=='list')
+
   #build a grid listing the years of analysis and submodels
   child_ras_grid = data.table::data.table(expand.grid(models = names(model_objects), time_scale = st$general_settings$time_scale, stringsAsFactors = F))
 
@@ -24,16 +27,20 @@ make_all_children_rasters = function(st, model_objects, time_points = NULL){
   #check to make sure ras_grid is greater than 0
   stopifnot(nrow(child_ras_grid)>0)
 
+  #use parLappyl
+  clus = parallel::makeCluster(st$general_settings$cores)
+  parallel::clusterEvalQ(clus, 'mbgstacking')
+
   #make rasters from the selected child models
-  raster_objects = parallel::mclapply(1:nrow(child_ras_grid),
+  raster_objects = parallel::parLapply(clus, 1:nrow(child_ras_grid),
                             function(x) make_child_raster(
                               model_obj = model_objects[[child_ras_grid[x,get('models')]]],
                               model_settings = st$models[[child_ras_grid[x,get('models')]]],
                               covs = lapply(st$covariate_layers, function(cl) fetch_covariate_layer(cl, child_ras_grid[x, get('time_position')])),
                               cs_df = st$cs_df,
-                              indicator_family = st$general_settings$indicator_family,
-                              cores = st$general_settings$cores
-                            ))
+                              indicator_family = st$general_settings$indicator_family
+                              ))
+  parallel::stopCluster(clus)
 
   #create raster bricks
   #make row ids on the child ras grid
@@ -54,11 +61,10 @@ make_all_children_rasters = function(st, model_objects, time_points = NULL){
 #' @param covs a named list of rasters,
 #' @param cs_df center scaling df
 #' @param indicator_family character. Model family
-#' @param cores numeric. Cores available for use
 #' @import data.table
 #' @importFrom stats na.omit predict setNames
 #'
-make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NULL, indicator_family = 'binomial',  cores = 1){
+make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NULL, indicator_family = 'binomial'){
 
   #convert rasters into a data table
   dm = data.table::data.table(raster::as.data.frame(raster::stack(covs), xy = T))
@@ -107,10 +113,14 @@ make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NU
     ret_obj = data.table(predict(model_obj, newdata=dm, type = 'response'))
     setnames(ret_obj, 'ret_obj')
 
-  } else if (inherits(model_obj, 'xgb.Booster')){
+  } else if (inherits(model_obj, 'xgb.Booster') | inherits(model_obj, 'raw')){
+
+    if(class(model_obj)=='raw'){
+      model_obj = xgboost::xgb.load(model_obj)
+    }
 
     #create new data object for xgboost
-    dm = xgboost::xgb.DMatrix(data = as.matrix(dm))
+    dm = xgboost::xgb.DMatrix(data = as.matrix(dm[,names(covs), with = F])) #not sure this subsetting is 100% strong
 
     ret_obj = data.table::data.table(ret_obj = predict(model_obj, newdata = dm))
 

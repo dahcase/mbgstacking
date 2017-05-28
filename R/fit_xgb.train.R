@@ -1,8 +1,8 @@
 #' Fit boosted regression tree/gradient boosted machine
 #'
-#' Fit a glm or penalized glm using h2o::h2o.glm. See help(h2o.glm) for more details
+#' Fit a boosted regression tree (or random forest given the proper set of options). See ??xgboost::xgb.train for more details
 #'
-#' @param st stacker governer. Stacking governer object with a penalized model initialized
+#' @param st stacker governor. Stacking governer object with a penalized model initialized
 #' @param model_name character vector. Name of the model to be run
 #' @param fold_col character vector. Denotes the name of the column designating the fold for crossval
 #' @param fold_id Numeric. Designates the value in fold col that should be held out
@@ -80,6 +80,9 @@ fit_xgb.train= function(st, model_name = 'brt',fold_col = NULL, fold_id = NULL, 
 
   #fix names
   names(output) = c('rid', paste0(model_name,".",fold_col,".",fold_id))
+
+  #convert mod to raw to avoid handle/pointer issues
+  mod = xgboost::xgb.save.raw(mod)
 
 
   if(return_model_obj){

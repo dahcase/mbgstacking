@@ -1,12 +1,12 @@
 #' Fit an Earth model
 #'
-#' Fit a multivariate regression spline model using earth::earth. See earth for more details.
+#' Fit a multivariate regression spline model using earth::earth. See earth::earth for more details.
 #'
-#' @param st stacker governer. Stacking governer object with an earth model initialized
-#' @param model_name character vector. Name of the model to be run
-#' @param fold_col character vector. Denotes the name of the column designating the fold for crossval
+#' @param st stacker governor. Stacking governer object with an earth model initialized. See mbgstacking::init_earth for more details.
+#' @param model_name character vector. Name/model identifier of the model to be run
+#' @param fold_col character vector. Denotes the name of the column designating the fold for crossvalidation
 #' @param fold_id Numeric. Designates the value in fold col that should be held out
-#' @param return_model_obj logical. Denotes whether the function should return the earth object or just predictions.
+#' @param return_model_obj logical. Denotes whether the function should return the earth model object or just predictions.
 #' @return List object with a data.table of predictions. If return_model_obj==T, the earth command and model object are returned as well
 #' @import data.table
 #' @importFrom stats predict

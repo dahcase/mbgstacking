@@ -1,15 +1,15 @@
 #' Initialize stacker
 #'
-#' Creates a stacker governor containing the various information and data to run stacked generalization
+#' Creates a stacker governor containing the various information and data to run stacked generalization in IHME's MBG framework
 #'
 #' @param ... Initialized models. If blank, default versions of earth and gam are created.
-#' @param data data table. Dataset to learned in stacking
+#' @param data data table. Dataset to be machine learned.
 #' @param indicator character vector. Name of the indicator (and by extension) the column name of the dependant variable
 #' @param indicator_family character vector. Designates the statistical family that should be modeled. Usually 'binomial' or 'gaussian'
 #' @param covariate_layers list of raster like objects. A named list of raster like objects of covariates
 #' @param fe_equation character vector of an equation. The equation specifying the fixed effects portion of the model. It should match with the names
 #' of covariate_layers.
-#' @param centre_scale logical. Determines whether the covariate values are centered before being returned
+#' @param centre_scale logical. Determines whether the covariate values are centered/normalized before being returned. Binary variables are ignored.
 #' @param time_var character vector. Name of the column denoting the time (e.g. period or year) of a given data point
 #' @param time_scale numeric vector. List of years or times that the time var correlates to.
 #' @param weight_col character vector. Denotes the column (if applicable) in the dataset that specifies the data weights
@@ -36,6 +36,8 @@ init_stacker = function(..., data, indicator, indicator_family, covariate_layers
   #test to make sure all items in ... are stacker children
   #otherwise R with throw: Error in govner$models[[obj[["model_name"]]]] <- obj :
   #attempt to select less than one element in OneIndex
+
+  #test to make sure data has x y and t
 
   #build the general settings
   general_settings = list(indicator = indicator, indicator_family = indicator_family,
@@ -96,10 +98,10 @@ init_stacker = function(..., data, indicator, indicator_family, covariate_layers
 }
 #' Initialize an earth model
 #'
-#' Creates an object designed to be passed to init_stacker that describes an earth model be added to the stacking ensemble.
+#' Creates an object designed to be passed to init_stacker that describes an earth::earth model be added to the stacking ensemble.
 #'
 #' @param model_name name of the earth model
-#' @param arguments named list. Arguments to be passed to the earth function. See help earth::earth for more information
+#' @param arguments named list. Arguments to be passed to the earth function. See ??earth::earth for more information
 #' @return named list of lists with the parameters required to run an earth model
 #' @export
 #'
@@ -109,10 +111,10 @@ init_earth = function(model_name = 'earth', arguments = list(degree = NULL, nk =
 }
 #' Initialize a gam model
 #'
-#' Creates an object designed to be passed to init_stacker that describes an gam model be added to the stacking ensemble.
+#' Creates an object designed to be passed to init_stacker that describes an gam::gam model be added to the stacking ensemble.
 #'
 #' @param model_name name of the gam model
-#' @param arguments named list. Arguments to be passed to the gan function. See help mgcv::gam for more information
+#' @param arguments named list. Arguments to be passed to the gan function. See ??mgcv::gam for more information
 #' @param formula formula or formula-like. Formula to be passed to the gam call that overwrites the underlying formula builder.
 #' This is useful if you want to have different covariates recieve different smoothing instructions
 #' @return named list of lists with the parameters required to run an gam model
@@ -126,10 +128,10 @@ init_gam = function(model_name = 'gam',  arguments = list(spline_args = list(bs 
 #init brt
 #' Initialize a brt model
 #'
-#' Creates an object designed to be passed to init_stacker that describes an brt model be added to the stacking ensemble.
+#' Creates an object designed to be passed to init_stacker that describes an xgboost::xgb.train model be added to the stacking ensemble.
 #'
 #' @param model_name name of the brt model
-#' @param arguments named list. Arguments to be passed to the brt function.
+#' @param arguments named list. Arguments to be passed to the xgboost::xgb.train function.
 #'                              Should only be used for options not captured by the params argument in the underlying xgboost function call.
 #'                              See help xgboost::xgb.train for more information
 #' @param params_arg named list. Arguments to be passed to the parameters argument of the xgboost::xgb.train function
@@ -145,6 +147,7 @@ init_brt = function(model_name = 'brt',  arguments = list(), params_arg = list(n
 }
 
 #init rf
+##to be implemented
 
 #' Initialize a penalized linear regression model
 #'
@@ -153,10 +156,9 @@ init_brt = function(model_name = 'brt',  arguments = list(), params_arg = list(n
 #' @param model_name name of the penalized regression model model
 #' @param arguments named list. Arguments to be passed to the glmnet function. See help glmnet::glmnet for more information.
 #' The main arguement to be passed is alpha: 0 is ridge regression and 1 is lasso penalty. Between 0 and 1 refers to elastic net.
-#' @param emp_logit logical. If family is binomial or poission, should the regression be run as gaussian (emp logit) or approximated as a poission with an offset.
-#' This is required because the h2o package only accepts binomial in the 0/1 form.
+#' @param emp_logit logical. If family is binomial, should the regression be run as gaussian (emp logit of cases/N)
 #' @param standardize logical. Standardize numeric columns to have zero mean and unit variance. Defaults to False unlike the glmnet default settings.
-#' This is useful if you want to have different covariates recieve different smoothing instructions
+#'                             This is set to F, because centre scaling/normalizing is a default preprocessing step
 #' @return named list of lists with the parameters required to run an penalized regression model
 #' @export
 #'
