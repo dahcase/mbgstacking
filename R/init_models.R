@@ -16,13 +16,14 @@
 #' @param num_fold_cols numeric. Number of columns/interations for crossfold validation
 #' @param num_folds numeric. The number of folds the data is split on.
 #' @param cores numeric. The number of cores available for computation
+#' @param mbgstacking_location character. File path to the folder where the mbgstacking package is
 #' @return Stacker governor object
 #' @import data.table
 #' @importFrom stats na.omit
 #' @export
 #'
 init_stacker = function(..., data, indicator, indicator_family, covariate_layers, fe_equation, centre_scale = T, time_var = 'year',
-                        time_scale = c(2000,2005,2010,2015), weight_col = NULL, num_fold_cols = 1, num_folds = 1, cores = 1){
+                        time_scale = c(2000,2005,2010,2015), weight_col = NULL, num_fold_cols = 1, num_folds = 1, cores = 1, mbgstacking_location = NULL){
 
   #if no child modules have been passed, make the default suite
   if(length(list(...)) == 0){
@@ -42,7 +43,7 @@ init_stacker = function(..., data, indicator, indicator_family, covariate_layers
   #build the general settings
   general_settings = list(indicator = indicator, indicator_family = indicator_family,
     weight_col = weight_col, fe_equation = fe_equation, cores = cores,
-    covs = format_covariates(fe_equation))
+    covs = format_covariates(fe_equation),mbgstacking_location = mbgstacking_location)
 
   #initialize the stacker object
   govner = structure(list(general_settings = general_settings), class = 'stacker_governor')
@@ -62,6 +63,9 @@ init_stacker = function(..., data, indicator, indicator_family, covariate_layers
                                 time_scale = time_scale)
 
   #add to dataset
+  if(nrow(govner$data) != nrow(cov_vals[[1]])){
+    stop('Dataset does not have a companion row in the covariate extraction. Check time scale is specified properly')
+  }
   govner$data = cbind(govner$data, cov_vals[[1]])
   if(centre_scale) govner$cs_df = cov_vals[[2]]
 

@@ -50,6 +50,8 @@ extract_covariates = function(xyt, covariate_list, centre_scale = T, time_var = 
   #extract the covariates
   cov_values = raster::extract(covariate_list, xyt[, c('longitude', 'latitude'), with = F])
 
+  #check to make sure
+
   #combine them
   xyt = cbind(xyt, cov_values)
 
@@ -58,6 +60,11 @@ extract_covariates = function(xyt, covariate_list, centre_scale = T, time_var = 
     xyt[,('time_id') := match(get(time_var), time_scale)]
   } else{
     xyt[,('time_id') := get(time_var)]
+  }
+
+  #make sure time id is not null
+  if(nrow(xyt[is.na(get('time_id')),])>0){
+    stop('Not all rows have a valid time id. Please check time scale')
   }
 
   #extract the column names of time varying covariates and their corrosponding stems
