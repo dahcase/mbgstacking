@@ -24,7 +24,7 @@ run_stacking_child_models = function(st){
   #initialize cluster
   clus = parallel::makeCluster(st$general_settings$cores)
   parallel::clusterEvalQ(clus, library('mbgstacking', lib.loc = st$general_settings$mbgstacking_location))
-  parallel::clusterExport(clus, st)
+  parallel::clusterExport(clus, 'st')
 
   #run the models
   stacking_models = parallel::parLapplyLB(clus, 1:nrow(model_grid),
