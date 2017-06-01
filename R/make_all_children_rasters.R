@@ -29,7 +29,7 @@ make_all_children_rasters = function(st, model_objects, time_points = NULL){
 
   #use parLappyl
   clus = parallel::makeCluster(st$general_settings$cores)
-  parallel::clusterExport(clus, 'st')
+  parallel::clusterExport(clus, 'st',environment())
   parallel::clusterEvalQ(clus, library("mbgstacking", lib.loc = st$general_settings$mbgstacking_location))
 
   #make rasters from the selected child models
