@@ -11,6 +11,7 @@
 #' @return List object with a data.table of predictions. If return_model_obj==T, the gam command and model object are returned as well
 #' @import data.table
 #' @importFrom stats predict
+#' @export
 #'
 fit_xgb.train= function(st, model_name = 'brt',fold_col = NULL, fold_id = NULL, return_model_obj = F, sub_cores = 1){
 

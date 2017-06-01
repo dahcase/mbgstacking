@@ -2,6 +2,11 @@
 
 export(emplogit)
 export(extract_covariates)
+export(fit_earth)
+export(fit_gam)
+export(fit_glmnet)
+export(fit_xgb.train)
+export(get_model_type)
 export(init_brt)
 export(init_earth)
 export(init_gam)

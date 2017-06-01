@@ -51,6 +51,7 @@ format_model_covs = function(covariates, additional_terms){
 #' @param model_name character string of the model name
 #' @return A string with the model type
 #' @import data.table
+#' @export
 #'
 get_model_type = function(st, model_name){
   st[['models']][[model_name]][['model_type']]
