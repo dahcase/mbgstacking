@@ -314,6 +314,7 @@ centreScale <- function (x, df, inverse = FALSE) {
 #' Add quotes
 #'
 #' @param x character string. Object to add quotes around
+#' @export
 #'
 addQuotes = function (x)
 {

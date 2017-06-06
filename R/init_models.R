@@ -15,15 +15,15 @@
 #' @param weight_col character vector. Denotes the column (if applicable) in the dataset that specifies the data weights
 #' @param num_fold_cols numeric. Number of columns/interations for crossfold validation
 #' @param num_folds numeric. The number of folds the data is split on.
-#' @param cores numeric. The number of cores available for computation
-#' @param mbgstacking_location character. File path to the folder where the mbgstacking package is
+#' @param cores numeric. The number of cores available for parallel computation
+#' @param use_sge logical. Should sun grid engine child model parallelization be used? If so, make sure sge options are filled out.
 #' @return Stacker governor object
 #' @import data.table
 #' @importFrom stats na.omit
 #' @export
 #'
 init_stacker = function(..., data, indicator, indicator_family, covariate_layers, fe_equation, centre_scale = T, time_var = 'year',
-                        time_scale = c(2000,2005,2010,2015), weight_col = NULL, num_fold_cols = 1, num_folds = 1, cores = 1, mbgstacking_location = NULL){
+                        time_scale = c(2000,2005,2010,2015), weight_col = NULL, num_fold_cols = 1, num_folds = 1, cores = 1, use_sge = F){
 
   #if no child modules have been passed, make the default suite
   if(length(list(...)) == 0){
@@ -43,7 +43,7 @@ init_stacker = function(..., data, indicator, indicator_family, covariate_layers
   #build the general settings
   general_settings = list(indicator = indicator, indicator_family = indicator_family,
     weight_col = weight_col, fe_equation = fe_equation, cores = cores,
-    covs = format_covariates(fe_equation),mbgstacking_location = mbgstacking_location)
+    covs = format_covariates(fe_equation))
 
   #initialize the stacker object
   govner = structure(list(general_settings = general_settings), class = 'stacker_governor')
