@@ -1,45 +1,47 @@
 #' Run a child model of the stacker using Sun Grid Engine
 #'
-#' @param stacking_folder path to folder where the stacker governer object is stored
+#' @param working_folder file_path. Scratch space where the stacker governer is saved
 #' @param st_name character. Name of the stacker
 #' @param st_function character. The name of the model function to be run, not the function itself
-#' @param rscript_path file path. Path to where script is saved on the machine.
 #' @param model_name character. name of the model to be run
 #' @param fold_col character vector. Denotes the name of the column designating the fold for crossval
 #' @param fold_id Numeric. Designates the value in fold col that should be held out
 #' @param return_model_obj logical. Denotes whether the function should return the earth object or just predictions.
-#' @param slots The number of slots to request in the qsub
-#' @param logfiles file path to where the output/error files should be stored
-#' @param cleanup logical. Should the qsub delete the shell script at the end of the command?
-#' @param package_location file path. Where is the mbgstacking package installed. Must be accessible by SGE
-#' @param additional_qsub_options character. Additional options to pass to the qsub
-#' @return List object with a data.table of predictions. If return_model_obj==T, the gam command and model object are returned as well
+#' @return character string. Name of the sge launched
 #' @import data.table
-#' @importFrom stats predict
 #' @export
 #'
 
-sge_run_child_model = function(stacking_folder = NULL, st_name = 'st', st_function = NULL, rscript_path = NULL, model_name = NULL, fold_col = NULL, fold_id = NULL,
-                               return_model_obj = F, slots = 4, logfiles = '/dev/null/', cleanup = F, package_location = NULL, additional_qsub_options = NULL){
+sge_run_child_model = function(working_folder = NULL, st_name = 'st', st_function = NULL, model_name = NULL, fold_col = NULL, fold_id = NULL,
+                               return_model_obj = F){
 
   #check to make sure stacking folder exists
-  stopifnot(dir.exists(stacking_folder))
-  #check to make sure rscript_path exists
-  stopifnot(file.exists(rscript_path))
-  #check to make sure package_location is legit and has mbgstacking
-  stopifnot(dir.exists(package_location))
+  stopifnot(dir.exists(working_folder))
+
   #make sure model name isn't null
   stopifnot(!is.null(model_name))
 
+  #if so, make sure st_function is valid
+  stopifnot(!is.null(get(st_function)))
 
   #load st, presumably saved before the call of this function
   #add a close slash if missing
-  if(substring(stacking_folder, nchar(stacking_folder)-1, nchar(stacking_folder))!='/') stacking_folder = paste0(stacking_folder, '/')
-  st_path = (paste0(stacking_folder, st_name, '.rds'))
+  if(substring(working_folder, nchar(working_folder), nchar(working_folder))!='/') working_folder = paste0(working_folder, '/')
+  st_path = (paste0(working_folder, st_name, '.rds'))
   st = readRDS(st_path)
 
-  #if so, make sure st_function is valid
-  stopifnot(!is.null(get(st_function)))
+  #shorten the names of some things
+  rscript_path = st$general_settings$sge_parameters$rscript_path
+  package_location = st$general_settings$sge_parameters$package_location
+  slots_per_job = st$general_settings$sge_parameters$slots_per_job
+  sgecommand = st$general_settings$sge_parameters$sge_command
+
+
+  #check to make sure rscript_path exists
+  stopifnot(file.exists(rscript_path))
+
+  #check to make sure package_location is legit and has mbgstacking
+  #todo
 
   #build shell/R script
   shell_header = '#$ -S /bin/sh'
@@ -68,24 +70,19 @@ sge_run_child_model = function(stacking_folder = NULL, st_name = 'st', st_functi
   the_commands = paste0(' -e ',paste(the_commands, collapse =' -e '))
 
   #create the shell script
-  qsub_shell = paste0(stacking_folder, save_model_name,'.sh')
-  fileConn = file()
+  qsub_shell = paste0(working_folder, save_model_name,'.sh')
+  fileConn = file(qsub_shell)
   writeLines(c(shell_header, paste0(rscript_path, ' ', the_commands)), fileConn)
+  flush(fileConn)
   close(fileConn)
 
   #qsub
-  #save logfiles ?
-  if(!is.null(logfiles) & dir.exists(logfiles)) {
-    qsub_logfiles = paste('-o', logfiles, '-e', logfiles)
-  }else{
-    qsub_logfiles = NULL
-  }
 
   qsub_name = paste0('-N ', save_model_name)
-  qsub_slots = paste0('-pe multi_slot ', slots)
+  qsub_slots = paste0('-pe multi_slot ', slots_per_job)
 
   #get the parts
-  qsub_call_parts = c('qsub', additional_qsub_options, qsub_logfiles, qsub_name, qsub_slots, qsub_shell)
+  qsub_call_parts = c('qsub', sgecommand, qsub_name, qsub_slots, qsub_shell)
 
   #remove null options
   qsub_call_parts = qsub_call_parts[!is.null(qsub_call_parts)]

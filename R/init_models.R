@@ -16,14 +16,14 @@
 #' @param num_fold_cols numeric. Number of columns/interations for crossfold validation
 #' @param num_folds numeric. The number of folds the data is split on.
 #' @param cores numeric. The number of cores available for parallel computation
-#' @param use_sge logical. Should sun grid engine child model parallelization be used? If so, make sure sge options are filled out.
+#' @param sge_parameters object returned from init_sge. Provides sge parameters to govern submodel computation. If NULL, mclapply is used to run submodels instead
 #' @return Stacker governor object
 #' @import data.table
 #' @importFrom stats na.omit
 #' @export
 #'
 init_stacker = function(..., data, indicator, indicator_family, covariate_layers, fe_equation, centre_scale = T, time_var = 'year',
-                        time_scale = c(2000,2005,2010,2015), weight_col = NULL, num_fold_cols = 1, num_folds = 1, cores = 1, use_sge = F){
+                        time_scale = c(2000,2005,2010,2015), weight_col = NULL, num_fold_cols = 1, num_folds = 1, cores = 1, sge_parameters = NULL){
 
   #if no child modules have been passed, make the default suite
   if(length(list(...)) == 0){
@@ -36,14 +36,14 @@ init_stacker = function(..., data, indicator, indicator_family, covariate_layers
 
   #test to make sure all items in ... are stacker children
   #otherwise R with throw: Error in govner$models[[obj[["model_name"]]]] <- obj :
-  #attempt to select less than one element in OneIndex
+  #attempt to select less than one element  in OneIndex
 
   #test to make sure data has x y and t
 
   #build the general settings
   general_settings = list(indicator = indicator, indicator_family = indicator_family,
     weight_col = weight_col, fe_equation = fe_equation, cores = cores,
-    covs = format_covariates(fe_equation))
+    covs = format_covariates(fe_equation), sge_parameters = sge_parameters)
 
   #initialize the stacker object
   govner = structure(list(general_settings = general_settings), class = 'stacker_governor')
@@ -169,4 +169,37 @@ init_brt = function(model_name = 'brt',  arguments = list(), params_arg = list(n
 init_penalized =function(model_name = 'pen',  arguments = list(alpha = 1), emp_logit = F, standardize = F){
   model = list(model_name = model_name, model_type = 'glmnet', args = arguments, emp_logit = emp_logit, standardize = standardize)
   return(model)
+}
+
+#' Initialize SGE parameters
+#'
+#' Creates an object designed to be passed to init_stacker that describes how the internal machinery should handle .
+#'
+#' @param working_foler character string. Location accessible to the computing cluster where scratch files can be saved
+#' @param output_files character string. Location where the output (.o) files are saved
+#' @param error_files character string. Location where the error (.e) files are save
+#' @param project_name character string. Cluster project
+#' @param other_options character string. Character string of additional options to pass to qsub
+#' @param slots_per_job numeric. Denotes the number of slots to be requested by each submodel. Leave null for automatic calculation (based on dataset size)
+#' @param package_location character string. Denotes the location where mbgstacking is installed (to be passed to the qsubs)
+#'
+#' @return List of lists containing the input parameters to be passed to the stacker
+#' @export
+#'
+init_sge = function(working_folder, rscript_path, output_files = NULL, error_files = NULL, project_name = NULL, other_options = NULL, slots_per_job = 2, package_location = NULL ){
+
+  output <- error <- project <- NULL
+
+  #build the sge stuff
+  if(!is.null(output_files)) output = paste('-o',output_files)
+  if(!is.null(error_files)) error = paste('-e', error_files)
+  if(!is.null(project_name)) project = paste('-P', project_name)
+
+  #combine
+  sge_command = c(output, error, project, other_options)
+  sge_command = sge_command[!is.null(sge_command)]
+  sge_command = paste(sge_command, collapse = " ")
+
+  return(list(sge_command = sge_command, slots_per_job = slots_per_job, package_location = package_location))
+
 }

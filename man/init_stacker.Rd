@@ -7,7 +7,7 @@
 init_stacker(..., data, indicator, indicator_family, covariate_layers,
   fe_equation, centre_scale = T, time_var = "year", time_scale = c(2000,
   2005, 2010, 2015), weight_col = NULL, num_fold_cols = 1, num_folds = 1,
-  cores = 1, mbgstacking_location = NULL)
+  cores = 1, sge_parameters = NULL)
 }
 \arguments{
 \item{...}{Initialized models. If blank, default versions of earth and gam are created.}
@@ -35,9 +35,9 @@ of covariate_layers.}
 
 \item{num_folds}{numeric. The number of folds the data is split on.}
 
-\item{cores}{numeric. The number of cores available for computation}
+\item{cores}{numeric. The number of cores available for parallel computation}
 
-\item{mbgstacking_location}{character. File path to the folder where the mbgstacking package is}
+\item{sge_parameters}{object returned from init_sge. Provides sge parameters to govern submodel computation. If NULL, mclapply is used to run submodels instead}
 }
 \value{
 Stacker governor object
