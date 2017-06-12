@@ -4,13 +4,11 @@
 \alias{sge_run_child_model}
 \title{Run a child model of the stacker using Sun Grid Engine}
 \usage{
-sge_run_child_model(st, working_folder = NULL, st_function = NULL,
-  model_name = NULL, fold_col = NA, fold_id = NA, return_model_obj = F)
+sge_run_child_model(st, st_function = NULL, model_name = NULL,
+  fold_col = NA, fold_id = NA, return_model_obj = F)
 }
 \arguments{
 \item{st}{stacker governer object}
-
-\item{working_folder}{file_path. Scratch space where the stacker governer is saved}
 
 \item{st_function}{character. The name of the model function to be run, not the function itself}
 

@@ -80,7 +80,6 @@ run_stacking_child_models = function(st){
     #Launch jobs on sge
     jobs = lapply(1:nrow(model_grid), function(x) sge_run_child_model(
                                         st = st,
-                                        working_folder = st$general_settings$sge_parameters$working_folder,
                                         st_function = paste0('fit_',get_model_type(st, model_grid[x,get('model_name')])),
                                         model_name = model_grid[x,get('model_name')],
                                         fold_col = model_grid[x,get('fold_columns')],

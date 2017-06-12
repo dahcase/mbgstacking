@@ -1,7 +1,6 @@
 #' Run a child model of the stacker using Sun Grid Engine
 #'
 #' @param st stacker governer object
-#' @param working_folder file_path. Scratch space where the stacker governer is saved
 #' @param st_function character. The name of the model function to be run, not the function itself
 #' @param model_name character. name of the model to be run
 #' @param fold_col character vector. Denotes the name of the column designating the fold for crossval
@@ -12,7 +11,7 @@
 #' @export
 #'
 
-sge_run_child_model = function(st, working_folder = NULL, st_function = NULL, model_name = NULL, fold_col = NA, fold_id = NA,
+sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_col = NA, fold_id = NA,
                                return_model_obj = F){
 
   #check to make sure stacking folder exists
@@ -29,7 +28,7 @@ sge_run_child_model = function(st, working_folder = NULL, st_function = NULL, mo
   package_location = st$general_settings$sge_parameters$package_location
   slots_per_job = st$general_settings$sge_parameters$slots_per_job
   sgecommand = st$general_settings$sge_parameters$sge_command
-
+  working_folder = st$general_settings$sge_parameters$working_folder
 
   #check to make sure rscript_path exists
   stopifnot(file.exists(rscript_path))
