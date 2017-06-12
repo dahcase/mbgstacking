@@ -9,6 +9,10 @@ init_sge(working_folder, rscript_path, output_files = NULL,
   slots_per_job = 2, package_location = NULL)
 }
 \arguments{
+\item{working_folder}{file path. Location accessible to the computing cluster where scratch files can be saved}
+
+\item{rscript_path}{file path. Full path to rscript.}
+
 \item{output_files}{character string. Location where the output (.o) files are saved}
 
 \item{error_files}{character string. Location where the error (.e) files are save}
@@ -20,8 +24,6 @@ init_sge(working_folder, rscript_path, output_files = NULL,
 \item{slots_per_job}{numeric. Denotes the number of slots to be requested by each submodel. Leave null for automatic calculation (based on dataset size)}
 
 \item{package_location}{character string. Denotes the location where mbgstacking is installed (to be passed to the qsubs)}
-
-\item{working_foler}{character string. Location accessible to the computing cluster where scratch files can be saved}
 }
 \value{
 List of lists containing the input parameters to be passed to the stacker

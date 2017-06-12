@@ -175,7 +175,8 @@ init_penalized =function(model_name = 'pen',  arguments = list(alpha = 1), emp_l
 #'
 #' Creates an object designed to be passed to init_stacker that describes how the internal machinery should handle .
 #'
-#' @param working_foler character string. Location accessible to the computing cluster where scratch files can be saved
+#' @param working_folder file path. Location accessible to the computing cluster where scratch files can be saved
+#' @param rscript_path file path. Full path to rscript.
 #' @param output_files character string. Location where the output (.o) files are saved
 #' @param error_files character string. Location where the error (.e) files are save
 #' @param project_name character string. Cluster project
@@ -190,6 +191,9 @@ init_sge = function(working_folder, rscript_path, output_files = NULL, error_fil
 
   output <- error <- project <- NULL
 
+  #standardize file paths
+  if(substring(working_folder, nchar(working_folder), nchar(working_folder))!='/') working_folder = paste0(working_folder, '/')
+
   #build the sge stuff
   if(!is.null(output_files)) output = paste('-o',output_files)
   if(!is.null(error_files)) error = paste('-e', error_files)
@@ -200,6 +204,6 @@ init_sge = function(working_folder, rscript_path, output_files = NULL, error_fil
   sge_command = sge_command[!is.null(sge_command)]
   sge_command = paste(sge_command, collapse = " ")
 
-  return(list(sge_command = sge_command, slots_per_job = slots_per_job, package_location = package_location))
+  return(list(working_folder = working_folder, rscript_path = rscript_path, sge_command = sge_command, slots_per_job = slots_per_job, package_location = package_location))
 
 }

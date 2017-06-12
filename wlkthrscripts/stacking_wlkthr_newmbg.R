@@ -1,6 +1,9 @@
 load("C:/Users/dccasey/ownCloud/ihme_work/stackin/sssa_v9.Rdata")
 #rm(the_data) #make sure extract covariates works
 rm(extract_covariates)
+rm(fit_earth)
+rm(fit_gam)
+rm(fit_glmnet)
 rm(emplogit)
 library(data.table)
 library(mbgstacking)
@@ -20,11 +23,11 @@ ridge_model = init_penalized('ridge', arguments = list(alpha = 0))
 enet_model = init_penalized('ridge', arguments = list(alpha = .52))
 brt_model = init_brt()
 
-sgeset = init_sge(working_folder = 'J:/temp/dccasey/', rscript_path = NULL, output_files= '/dev/null', error_files = '/dev/null',
+sgeset =init_sge(working_folder = 'C:/Users/dccasey/Documents/illness_mapping/test_stacking', rscript_path = 'C:/Users/dccasey/ownCloud/ihme_work/stackin/sssa_v9.Rdata', output_files= '/dev/null', error_files = '/dev/null',
                   project_name = 'project_geospatial', other_options = NULL, slots_per_job = 3 ,package_location = NULL)
 
 #create the stacker governor
-steak = init_stacker(earth_model, gam_model, lasso_model,ridge_model, enet_model,brt_model, #em_def, em_chg, enet, gm_def,
+steak = init_stacker( enet_model, lasso_model,#earth_model, gam_model, lasso_model,ridge_model, enet_model,brt_model, #em_def, em_chg, enet, gm_def,
                    data = df,
                    indicator = indicator,
                    indicator_family = indicator_family,
@@ -39,26 +42,7 @@ steak = init_stacker(earth_model, gam_model, lasso_model,ridge_model, enet_model
                    cores = cores_to_use,
                    sge_parameters = sgeset)
 
-
-
-#test out sge_run_child_model
-working_folder = 'J:/temp/dccasey/'
-
-#implict step
-saveRDS(steak, paste0(working_folder,'steak.rds'))
-
-
-st_name = 'steak'
-st_function = 'fit_gam'
-model_name = 'gam'
-fold_col = NULL
-fold_id = NULL
-return_model_obj = F
-
-
-
-
-# model_results = run_stacking_child_models(steak)
+ model_results = run_stacking_child_models(steak)
 #
 # child_ras = make_all_children_rasters(st = steak, model_objects = model_results[[2]], time_points = c(2000, 2005, 2010, 2015))
 #

@@ -1,7 +1,7 @@
 #' Run a child model of the stacker using Sun Grid Engine
 #'
+#' @param st stacker governer object
 #' @param working_folder file_path. Scratch space where the stacker governer is saved
-#' @param st_name character. Name of the stacker
 #' @param st_function character. The name of the model function to be run, not the function itself
 #' @param model_name character. name of the model to be run
 #' @param fold_col character vector. Denotes the name of the column designating the fold for crossval
@@ -12,7 +12,7 @@
 #' @export
 #'
 
-sge_run_child_model = function(working_folder = NULL, st_name = 'st', st_function = NULL, model_name = NULL, fold_col = NULL, fold_id = NULL,
+sge_run_child_model = function(st, working_folder = NULL, st_function = NULL, model_name = NULL, fold_col = NA, fold_id = NA,
                                return_model_obj = F){
 
   #check to make sure stacking folder exists
@@ -23,12 +23,6 @@ sge_run_child_model = function(working_folder = NULL, st_name = 'st', st_functio
 
   #if so, make sure st_function is valid
   stopifnot(!is.null(get(st_function)))
-
-  #load st, presumably saved before the call of this function
-  #add a close slash if missing
-  if(substring(working_folder, nchar(working_folder), nchar(working_folder))!='/') working_folder = paste0(working_folder, '/')
-  st_path = (paste0(working_folder, st_name, '.rds'))
-  st = readRDS(st_path)
 
   #shorten the names of some things
   rscript_path = st$general_settings$sge_parameters$rscript_path
@@ -46,6 +40,7 @@ sge_run_child_model = function(working_folder = NULL, st_name = 'st', st_functio
   #build shell/R script
   shell_header = '#$ -S /bin/sh'
   library_call = paste0('library(\'mbgstacking\', lib.loc = ', package_location,')')
+  st_path = paste0(working_folder,'st.rds')
   load_data = paste0('st = readRDS(',st_path,')')
 
   #set up model call
@@ -61,7 +56,7 @@ sge_run_child_model = function(working_folder = NULL, st_name = 'st', st_functio
   if(fold_col=='NULL') fold_col = NULL
   if(fold_id == 'NULL') fold_id = NULL
 
-  save_model_name = paste(model_name, fold_col, fold_id, sep = '.')
+  save_model_name = paste(model_name, fold_col, fold_id, sep = '_')
 
   save_results = paste0('saveRDS(mod, ',save_model_name, '.rds)')
 
@@ -90,7 +85,7 @@ sge_run_child_model = function(working_folder = NULL, st_name = 'st', st_functio
   qsub = paste(qsub_call_parts, collapse = ' ')
 
   #launch the job and return the name for tracking
-  system(qsub)
+  ifelse(Sys.info()[1]=='Windows', print(qsub),system(qsub))
   return(qsub_name)
 
 }
