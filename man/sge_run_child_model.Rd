@@ -5,8 +5,7 @@
 \title{Run a child model of the stacker using Sun Grid Engine}
 \usage{
 sge_run_child_model(st, working_folder = NULL, st_function = NULL,
-  model_name = NULL, fold_col = NULL, fold_id = NULL,
-  return_model_obj = F)
+  model_name = NULL, fold_col = NA, fold_id = NA, return_model_obj = F)
 }
 \arguments{
 \item{st}{stacker governer object}
