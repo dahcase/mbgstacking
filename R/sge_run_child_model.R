@@ -14,6 +14,13 @@
 sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_col = NA, fold_id = NA,
                                return_model_obj = F){
 
+  #shorten the names of some things
+  rscript_path = st$general_settings$sge_parameters$rscript_path
+  package_location = st$general_settings$sge_parameters$package_location
+  slots_per_job = st$general_settings$sge_parameters$slots_per_job
+  sgecommand = st$general_settings$sge_parameters$sge_command
+  working_folder = st$general_settings$sge_parameters$working_folder
+
   #check to make sure stacking folder exists
   stopifnot(dir.exists(working_folder))
 
@@ -23,12 +30,6 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
   #if so, make sure st_function is valid
   stopifnot(!is.null(get(st_function)))
 
-  #shorten the names of some things
-  rscript_path = st$general_settings$sge_parameters$rscript_path
-  package_location = st$general_settings$sge_parameters$package_location
-  slots_per_job = st$general_settings$sge_parameters$slots_per_job
-  sgecommand = st$general_settings$sge_parameters$sge_command
-  working_folder = st$general_settings$sge_parameters$working_folder
 
   #check to make sure rscript_path exists
   stopifnot(file.exists(rscript_path))
