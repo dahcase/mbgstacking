@@ -319,7 +319,34 @@ centreScale <- function (x, df, inverse = FALSE) {
 addQuotes = function (x)
 {
   if (is.character(x)) {
+    x <- sprintf("\'%s\'", x)
+  }
+  return(x)
+}
+
+#' Add quotes using "
+#'
+#' @param x character string. Object to add quotes around
+#' @export
+#'
+addQuotes_d = function (x)
+{
+  if (is.character(x)) {
     x <- sprintf("\"%s\"", x)
   }
   return(x)
 }
+
+#' Add quotes using '
+#'
+#' @param x character string. Object to add quotes around
+#' @export
+#'
+addQuotes_s = function (x)
+{
+  if (is.character(x)) {
+    x <- sprintf("\'%s\'", x)
+  }
+  return(x)
+}
+

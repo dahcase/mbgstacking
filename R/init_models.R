@@ -183,11 +183,13 @@ init_penalized =function(model_name = 'pen',  arguments = list(alpha = 1), emp_l
 #' @param other_options character string. Character string of additional options to pass to qsub
 #' @param slots_per_job numeric. Denotes the number of slots to be requested by each submodel. Leave null for automatic calculation (based on dataset size)
 #' @param package_location character string. Denotes the location where mbgstacking is installed (to be passed to the qsubs)
+#' @param conda_source file path. Denotes the location where a conda environment activate option is
+#' @param conda_env file path. File path to the name of the conda environment
 #'
 #' @return List of lists containing the input parameters to be passed to the stacker
 #' @export
 #'
-init_sge = function(working_folder, rscript_path, output_files = NULL, error_files = NULL, project_name = NULL, other_options = NULL, slots_per_job = 2, package_location = NULL ){
+init_sge = function(working_folder, rscript_path, output_files = NULL, error_files = NULL, project_name = NULL, other_options = NULL, slots_per_job = 2, package_location = NULL, conda_activate = NULL, conda_env = NULL){
 
   output <- error <- project <- NULL
 
@@ -204,6 +206,6 @@ init_sge = function(working_folder, rscript_path, output_files = NULL, error_fil
   sge_command = sge_command[!is.null(sge_command)]
   sge_command = paste(sge_command, collapse = " ")
 
-  return(list(working_folder = working_folder, rscript_path = rscript_path, sge_command = sge_command, slots_per_job = slots_per_job, package_location = package_location))
+  return(list(working_folder = working_folder, rscript_path = rscript_path, sge_command = sge_command, slots_per_job = slots_per_job, package_location = package_location, conda_activate = conda_activate, conda_env = conda_env))
 
 }

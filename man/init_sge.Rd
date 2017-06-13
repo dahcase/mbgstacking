@@ -6,7 +6,8 @@
 \usage{
 init_sge(working_folder, rscript_path, output_files = NULL,
   error_files = NULL, project_name = NULL, other_options = NULL,
-  slots_per_job = 2, package_location = NULL)
+  slots_per_job = 2, package_location = NULL, conda_activate = NULL,
+  conda_env = NULL)
 }
 \arguments{
 \item{working_folder}{file path. Location accessible to the computing cluster where scratch files can be saved}
@@ -24,6 +25,10 @@ init_sge(working_folder, rscript_path, output_files = NULL,
 \item{slots_per_job}{numeric. Denotes the number of slots to be requested by each submodel. Leave null for automatic calculation (based on dataset size)}
 
 \item{package_location}{character string. Denotes the location where mbgstacking is installed (to be passed to the qsubs)}
+
+\item{conda_env}{file path. File path to the name of the conda environment}
+
+\item{conda_source}{file path. Denotes the location where a conda environment activate option is}
 }
 \value{
 List of lists containing the input parameters to be passed to the stacker

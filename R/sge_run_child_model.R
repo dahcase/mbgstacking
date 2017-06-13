@@ -39,40 +39,48 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
 
   #build shell/R script
   shell_header = '#$ -S /bin/sh'
-  library_call = paste0('library(\'mbgstacking\', lib.loc = ', package_location,')')
+  library_call = paste0('library(\'mbgstacking\', lib.loc = ', addQuotes_s(package_location),')')
+  add_lib_paths = paste0('.libPaths(', addQuotes_s(package_location), ')')
+
   st_path = paste0(working_folder,'st.rds')
-  load_data = paste0('st = readRDS(',st_path,')')
+  load_data = paste0('st = readRDS(',addQuotes_s(st_path),')')
 
   #set up model call
   #if fold col or fold id are null, change then to be character string 'NULL'
-  if(is.null(fold_col)) fold_col = 'NULL'
-  if(is.null(fold_id)) fold_id = 'NULL'
+  if(is.na(fold_col) | is.null(fold_col)) fold_col = 'NA'
+  if(is.na(fold_id) | is.null(fold_id)) fold_id = 'NA'
 
-  model_call = paste0('(st', ', model_name = ','\'',model_name,'\'', ', fold_col = ', fold_col, ', fold_id = ', fold_id, ', return_model_obj =', return_model_obj,')')
+  model_call = paste0('(st', ', model_name = ','\'',model_name,'\'', ', fold_col = ', addQuotes_s(fold_col), ', fold_id = ', fold_id, ', return_model_obj =', return_model_obj,')')
 
   run_model = paste0('mod = ', st_function,model_call)
 
   #change back
-  if(fold_col=='NULL') fold_col = NULL
-  if(fold_id == 'NULL') fold_id = NULL
+  if(fold_col=='NA') fold_col = NA
+  if(fold_id == 'NA') fold_id = NA
 
   save_model_name = paste(model_name, fold_col, fold_id, sep = '_')
 
-  save_results = paste0('saveRDS(mod, ',save_model_name, '.rds)')
+  save_results = paste0('saveRDS(mod, ',addQuotes_s(paste0(working_folder, save_model_name, '.rds')),')')
 
   #add quotes to the command
-  the_commands = sapply(c(library_call,load_data,run_model, save_results), addQuotes)
+  the_commands = sapply(c(library_call,add_lib_paths, load_data,run_model, save_results), addQuotes_d)
   the_commands = paste0(' -e ',paste(the_commands, collapse =' -e '))
+
+  #write lines to activate the environment if called for
+  if(!is.null(st$general_settings$sge_parameters$conda_activate)){
+    activate_conda = paste(st$general_settings$sge_parameters$conda_activate, st$general_settings$sge_parameters$conda_env)
+  }else{
+    activate_conda = ""
+  }
 
   #create the shell script
   qsub_shell = paste0(working_folder, save_model_name,'.sh')
   fileConn = file(qsub_shell)
-  writeLines(c(shell_header, paste0(rscript_path, ' ', the_commands)), fileConn)
+  writeLines(c(shell_header, activate_conda, paste0(rscript_path, ' ', the_commands)), fileConn)
   flush(fileConn)
   close(fileConn)
 
   #qsub
-
   qsub_name = paste0('-N ', save_model_name)
   qsub_slots = paste0('-pe multi_slot ', slots_per_job)
 
