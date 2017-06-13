@@ -14,14 +14,14 @@ install.packages('devtools', lib = rpack)
 install.packages('xgboost', lib = rpack)
 devtools::install_github('dahcase/mbgstacking', lib = rpack)
 
-
-#with source activate stacking on
+#rnew (3.4)
 #scl enable devtoolset-4 bash
 rpack = '/share/geospatial/stacking_packages_r34/'
 .libPaths('/share/geospatial/stacking_packages_r34/')
 devtools::install_github('dahcase/mbgstacking', lib = rpack)
 
-#rnew
+#r conda
+#with source activate on
 rpack = '/share/geospatial/stacking_packages_conda/'
 .libPaths('/share/geospatial/stacking_packages_conda/')
 devtools::install_github('dahcase/mbgstacking', lib = rpack)

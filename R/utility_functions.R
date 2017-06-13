@@ -196,8 +196,8 @@ build_parameter_grid = function(..., grid_type = 'ordered'){
 #'
 make_test_train = function(data, fold_col =NULL, fold_id=NULL){
   #mark which rows need to be included and which don't (e.g. test and train)
-  if(is.null(fold_col)) fold_col = NA
-  if(is.null(fold_id)) fold_id = NA
+  if(is.null(fold_col)|is.na(fold_col)) fold_col = NA
+  if(is.null(fold_id)|is.na(fold_id)) fold_id = NA
 
   if(!is.na(fold_col)){
     if(!is.na(fold_id)){
