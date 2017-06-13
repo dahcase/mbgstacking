@@ -4,15 +4,15 @@
 \alias{init_sge}
 \title{Initialize SGE parameters}
 \usage{
-init_sge(working_folder, rscript_path, output_files = NULL,
-  error_files = NULL, project_name = NULL, other_options = NULL,
-  slots_per_job = 2, package_location = NULL, conda_activate = NULL,
-  conda_env = NULL)
+init_sge(working_folder, r_path, output_files = NULL, error_files = NULL,
+  project_name = NULL, other_options = NULL, slots_per_job = 2,
+  package_location = NULL, conda_activate = NULL, conda_env = NULL,
+  write_shell = F)
 }
 \arguments{
 \item{working_folder}{file path. Location accessible to the computing cluster where scratch files can be saved}
 
-\item{rscript_path}{file path. Full path to rscript.}
+\item{r_path}{file path. Full path to R}
 
 \item{output_files}{character string. Location where the output (.o) files are saved}
 
@@ -26,9 +26,11 @@ init_sge(working_folder, rscript_path, output_files = NULL,
 
 \item{package_location}{character string. Denotes the location where mbgstacking is installed (to be passed to the qsubs)}
 
-\item{conda_env}{file path. File path to the name of the conda environment}
+\item{conda_env}{file path. File path to the name of the conda environment. Not implemented.}
 
-\item{conda_source}{file path. Denotes the location where a conda environment activate option is}
+\item{write_shell}{logical. Should the qsub be run via writing shell scripts. If F, qsubs are lanunched via the "-b y" flag}
+
+\item{conda_source}{file path. Denotes the location where a conda environment activate option is. Not implemented.}
 }
 \value{
 List of lists containing the input parameters to be passed to the stacker

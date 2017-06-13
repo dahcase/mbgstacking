@@ -176,20 +176,20 @@ init_penalized =function(model_name = 'pen',  arguments = list(alpha = 1), emp_l
 #' Creates an object designed to be passed to init_stacker that describes how the internal machinery should handle .
 #'
 #' @param working_folder file path. Location accessible to the computing cluster where scratch files can be saved
-#' @param rscript_path file path. Full path to rscript.
+#' @param r_path file path. Full path to R
 #' @param output_files character string. Location where the output (.o) files are saved
 #' @param error_files character string. Location where the error (.e) files are save
 #' @param project_name character string. Cluster project
 #' @param other_options character string. Character string of additional options to pass to qsub
 #' @param slots_per_job numeric. Denotes the number of slots to be requested by each submodel. Leave null for automatic calculation (based on dataset size)
 #' @param package_location character string. Denotes the location where mbgstacking is installed (to be passed to the qsubs)
-#' @param conda_source file path. Denotes the location where a conda environment activate option is
-#' @param conda_env file path. File path to the name of the conda environment
-#'
+#' @param conda_source file path. Denotes the location where a conda environment activate option is. Not implemented.
+#' @param conda_env file path. File path to the name of the conda environment. Not implemented.
+#' @param write_shell logical. Should the qsub be run via writing shell scripts. If F, qsubs are lanunched via the "-b y" flag
 #' @return List of lists containing the input parameters to be passed to the stacker
 #' @export
 #'
-init_sge = function(working_folder, rscript_path, output_files = NULL, error_files = NULL, project_name = NULL, other_options = NULL, slots_per_job = 2, package_location = NULL, conda_activate = NULL, conda_env = NULL){
+init_sge = function(working_folder, r_path, output_files = NULL, error_files = NULL, project_name = NULL, other_options = NULL, slots_per_job = 2, package_location = NULL, conda_activate = NULL, conda_env = NULL, write_shell = F){
 
   output <- error <- project <- NULL
 
@@ -206,6 +206,6 @@ init_sge = function(working_folder, rscript_path, output_files = NULL, error_fil
   sge_command = sge_command[!is.null(sge_command)]
   sge_command = paste(sge_command, collapse = " ")
 
-  return(list(working_folder = working_folder, rscript_path = rscript_path, sge_command = sge_command, slots_per_job = slots_per_job, package_location = package_location, conda_activate = conda_activate, conda_env = conda_env))
+  return(list(working_folder = working_folder, r_path = r_path, sge_command = sge_command, slots_per_job = slots_per_job, package_location = package_location, conda_activate = conda_activate, conda_env = conda_env, write_shell = write_shell))
 
 }

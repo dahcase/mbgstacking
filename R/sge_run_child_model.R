@@ -15,12 +15,12 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
                                return_model_obj = F){
 
   #shorten the names of some things
-  rscript_path = st$general_settings$sge_parameters$rscript_path
+  r_path = st$general_settings$sge_parameters$r_path
   package_location = st$general_settings$sge_parameters$package_location
   slots_per_job = st$general_settings$sge_parameters$slots_per_job
   sgecommand = st$general_settings$sge_parameters$sge_command
   working_folder = st$general_settings$sge_parameters$working_folder
-
+  write_shell = st$general_settings$sge_parameters$write_shell
   #check to make sure stacking folder exists
   stopifnot(dir.exists(working_folder))
 
@@ -31,8 +31,8 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
   stopifnot(!is.null(get(st_function)))
 
 
-  #check to make sure rscript_path exists
-  stopifnot(file.exists(rscript_path))
+  #check to make sure r_path exists
+  stopifnot(file.exists(r_path))
 
   #check to make sure package_location is legit and has mbgstacking
   #todo
@@ -64,21 +64,28 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
 
   #add quotes to the command
   the_commands = sapply(c(library_call,add_lib_paths, load_data,run_model, save_results), addQuotes_d)
-  the_commands = paste0(' -e ',paste(the_commands, collapse =' -e '))
+  the_commands = paste0(' -e ',paste(the_commands, collapse =' -e '), '--vanilla')
 
   #write lines to activate the environment if called for
-  if(!is.null(st$general_settings$sge_parameters$conda_activate)){
-    activate_conda = paste(st$general_settings$sge_parameters$conda_activate, st$general_settings$sge_parameters$conda_env)
-  }else{
-    activate_conda = ""
-  }
+  # if(!is.null(st$general_settings$sge_parameters$conda_activate)){
+  #   activate_conda = paste(st$general_settings$sge_parameters$conda_activate, st$general_settings$sge_parameters$conda_env)
+  # }else{
+  #   activate_conda = ""
+  # }
+
+  #set r commands
+  r_commands = paste0(r_path, ' ', the_commands)
 
   #create the shell script
-  qsub_shell = paste0(working_folder, save_model_name,'.sh')
-  fileConn = file(qsub_shell)
-  writeLines(c(shell_header, activate_conda, paste0(rscript_path, ' ', the_commands)), fileConn)
-  flush(fileConn)
-  close(fileConn)
+  if(write_shell){
+    qsub_shell = paste0(working_folder, save_model_name,'.sh')
+    fileConn = file(qsub_shell)
+    writeLines(c(shell_header, activate_conda, r_commands), fileConn)
+    flush(fileConn)
+    close(fileConn)
+  }else{
+    qsub_shell = paste('-b y', r_commands )
+  }
 
   #qsub
   qsub_name = paste0('-N ', save_model_name)
