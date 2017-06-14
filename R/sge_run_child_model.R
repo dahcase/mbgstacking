@@ -39,7 +39,7 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
 
   #build shell/R script
   shell_header = '#$ -S /bin/sh'
-  library_call = paste0('library(\'mbgstacking\', lib.loc = ', addQuotes_s(package_location),')')
+  library_call = paste0('library(mbgstacking , lib.loc = ', addQuotes_s(package_location),')')
   add_lib_paths = paste0('.libPaths(', addQuotes_s(package_location), ')')
 
   st_path = paste0(working_folder,'st.rds')
@@ -50,7 +50,7 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
   if(is.na(fold_col) | is.null(fold_col)) fold_col = 'NA'
   if(is.na(fold_id) | is.null(fold_id)) fold_id = 'NA'
 
-  model_call = paste0('(st', ', model_name = ','\'',model_name,'\'', ', fold_col = ', addQuotes_s(fold_col), ', fold_id = ', fold_id, ', return_model_obj =', return_model_obj,')')
+  model_call = paste0('(st', ', model_name = ',addQuotes_s(model_name), ', fold_col = ', addQuotes_s(fold_col), ', fold_id = ', fold_id, ', return_model_obj =', return_model_obj,')')
 
   run_model = paste0('mod = ', st_function,model_call)
 
@@ -64,7 +64,7 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
 
   #add quotes to the command
   the_commands = sapply(c(library_call,add_lib_paths, load_data,run_model, save_results), addQuotes_d)
-  the_commands = paste0(' -e ',paste(the_commands, collapse =' -e '), '--vanilla')
+  the_commands = paste0(' -e ',paste(the_commands, collapse =' -e '))
 
   #write lines to activate the environment if called for
   # if(!is.null(st$general_settings$sge_parameters$conda_activate)){
@@ -80,11 +80,12 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
   if(write_shell){
     qsub_shell = paste0(working_folder, save_model_name,'.sh')
     fileConn = file(qsub_shell)
-    writeLines(c(shell_header, activate_conda, r_commands), fileConn)
+    writeLines(c(shell_header, r_commands), fileConn)
     flush(fileConn)
     close(fileConn)
   }else{
-    qsub_shell = paste('-b y', r_commands )
+    r_commands =
+      qsub_shell = paste('-b y', shQuote(r_commands))
   }
 
   #qsub
@@ -102,5 +103,6 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
   #launch the job and return the name for tracking
   ifelse(Sys.info()[1]=='Windows', print(qsub),system(qsub))
   return(qsub_name)
+  #return(qsub)
 
 }
