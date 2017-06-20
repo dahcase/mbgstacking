@@ -376,7 +376,7 @@ make_model_grid = function(st, add_parents = T){
 #' @export
 #'
 sge_hold_via_sync = function(st, job_name = "holder", hold_on_jobs) {
-  hold_jobs = paste('-hold_jid', paste(hold_on_jobs, collapse = ' '))
+  hold_jobs = paste('-hold_jid', paste(hold_on_jobs, collapse = ','))
   job_name = paste("-N", job_name)
   project_and_logs = st$general_settings$sge_parameters$sge_command
   slot_request = '-pe multi_slot 1'
