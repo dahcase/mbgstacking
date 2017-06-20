@@ -318,10 +318,7 @@ centreScale <- function (x, df, inverse = FALSE) {
 #'
 addQuotes = function (x)
 {
-  if (is.character(x)) {
-    x <- sprintf("\'%s\'", x)
-  }
-  return(x)
+  addQuotes_s(x)
 }
 
 #' Add quotes using "
@@ -349,4 +346,47 @@ addQuotes_s = function (x)
   }
   return(x)
 }
+
+#' Generate a model grid from a stacker object
+#'
+#' @param st stacker governor.
+#' @param add_parents logical. Add the "parent" models (e.g. the full ones where we want the model object)
+#' @export
+#'
+make_model_grid = function(st, add_parents = T){
+  model_grid = data.table(expand.grid(
+    model_name = names(st$models),
+    fold_columns = st$general_settings$fold_cols,
+    fold_ids = st$general_settings$fold_ids, stringsAsFactors = F),
+    return_model_obj = F)
+
+  #add the main model runs
+  if(add_parents){
+    main_mods = data.table(model_name = names(st$models), return_model_obj = T)
+    model_grid = rbind(model_grid,main_mods, fill = T)
+  }
+
+}
+
+#' Create a blank job to pause R until the child jobs complete
+#'
+#' @param st stacker governor. Must have relevant sge settings
+#' @param job_name character. Name of the holding job
+#' @param hold_on_jobs character vector. The name of the jobs that this job should hold on.
+#' @export
+#'
+sge_hold_via_sync = function(st, job_name = "holder", hold_on_jobs) {
+  hold_jobs = paste('-hold_jid', paste(hold_on_jobs, collapse = ' '))
+  job_name = paste("-N", job_name)
+  project_and_logs = st$general_settings$sge_parameters$sge_command
+  slot_request = '-pe multi_slot 1'
+  additional_flags = '-b y -sync y'
+  command = shQuote('echo 1')
+
+  qsub = paste('qsub', job_name, hold_jobs, project_and_logs, slot_request, additional_flags, command)
+  system(qsub)
+}
+
+
+
 

@@ -102,7 +102,7 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
 
   #launch the job and return the name for tracking
   ifelse(Sys.info()[1]=='Windows', print(qsub),system(qsub))
-  return(qsub_name)
+  return(save_model_name)
   #return(qsub)
 
 }
