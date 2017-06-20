@@ -27,22 +27,14 @@ make_all_children_rasters = function(st, model_objects, time_points = NULL){
   #check to make sure ras_grid is greater than 0
   stopifnot(nrow(child_ras_grid)>0)
 
-  #use parLappyl
-  clus = parallel::makeCluster(st$general_settings$cores)
-  parallel::clusterExport(clus, 'st',environment())
-  parallel::clusterEvalQ(clus, library("mbgstacking", lib.loc = st$general_settings$mbgstacking_location))
-
-  #make rasters from the selected child models
-  raster_objects = parallel::parLapply(clus, 1:nrow(child_ras_grid),
+  #make rasters from the selected child models-- this probably won't scale super well
+  raster_objects = parallel::mclapply(1:nrow(child_ras_grid),
                             function(x) make_child_raster(
                               model_obj = model_objects[[child_ras_grid[x,get('models')]]],
                               model_settings = st$models[[child_ras_grid[x,get('models')]]],
                               covs = lapply(st$covariate_layers, function(cl) fetch_covariate_layer(cl, child_ras_grid[x, get('time_position')])),
                               cs_df = st$cs_df,
-                              indicator_family = st$general_settings$indicator_family
-                              ))
-  parallel::stopCluster(clus)
-
+                              indicator_family = st$general_settings$indicator_family), mc.cores = st$general_settings$cores, mc.preschedule = F)
   #create raster bricks
   #make row ids on the child ras grid
   child_ras_grid = child_ras_grid[,('rid') := 1:.N]
@@ -130,7 +122,7 @@ make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NU
     }
   }
 
-  #remove dm from meory
+  #remove dm from memory
   rm(dm)
 
   #convert back into a raster
