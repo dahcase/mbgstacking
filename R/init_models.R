@@ -13,7 +13,8 @@
 #' @param time_var character vector. Name of the column denoting the time (e.g. period or year) of a given data point
 #' @param time_scale numeric vector. List of years or times that the time var correlates to.
 #' @param weight_col character vector. Denotes the column (if applicable) in the dataset that specifies the data weights
-#' @param num_fold_cols numeric. Number of columns/interations for crossfold validation
+#' @param num_fold_cols numeric or character. Number of columns/interations for crossfold validation. if a character string, assume it refers to columns already existing in data.
+#'                      They will be renamed to sfold_#
 #' @param num_folds numeric. The number of folds the data is split on.
 #' @param cores numeric. The number of cores available for parallel computation
 #' @param sge_parameters object returned from init_sge. Provides sge parameters to govern submodel computation. If NULL, mclapply is used to run submodels instead
@@ -52,8 +53,16 @@ init_stacker = function(..., data, indicator, indicator_family, covariate_layers
   govner$data = data.table::copy(data)
 
   #make fold columns
-  folds = make_stacking_folds(nrow(govner$data), numfolds = num_folds, numsets = num_fold_cols)
-  govner$data = cbind(govner$data, folds)
+  if(is.character(num_fold_cols)){
+    #rename the fold columns
+    folds = num_fold_cols
+    num_folds = 1:length(unique(govner$data[,get(folds[1])]))
+
+  }else{
+    folds = make_stacking_folds(nrow(govner$data), numfolds = num_folds, numsets = num_fold_cols)
+    govner$data = cbind(govner$data, folds)
+  }
+
 
   #extract covariates
   cov_vals = extract_covariates(xyt = govner$data[,c('longitude','latitude',time_var), with = F],

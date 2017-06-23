@@ -58,7 +58,7 @@ sge_run_make_child_raster = function(st, model_obj_name, time_position){
   #make the raster
   mo = paste0('model_obj = model_objects[[',addQuotes_s(model_obj_name),']]')
   ms = paste0('model_settings = st$models[[', addQuotes_s(model_obj_name), ']]')
-  cv = paste0('covs = lapply(st$covariate_layers, function(cl) fetch_covariate_layer(cl,', time_position,')')
+  cv = paste0('covs = lapply(st$covariate_layers, function(cl) fetch_covariate_layer(cl,', time_position,'))')
   cs = 'st$cs_df'
   mf = 'indicator_family = st$general_settings$indicator_family'
   make_raster = paste0('ras = make_child_raster(', paste(mo, ms, cv, cs,mf, sep = ','), ')')

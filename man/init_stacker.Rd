@@ -31,7 +31,8 @@ of covariate_layers.}
 
 \item{weight_col}{character vector. Denotes the column (if applicable) in the dataset that specifies the data weights}
 
-\item{num_fold_cols}{numeric. Number of columns/interations for crossfold validation}
+\item{num_fold_cols}{numeric or character. Number of columns/interations for crossfold validation. if a character string, assume it refers to columns already existing in data.
+They will be renamed to sfold_#}
 
 \item{num_folds}{numeric. The number of folds the data is split on.}
 
