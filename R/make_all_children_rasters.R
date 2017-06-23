@@ -43,7 +43,7 @@ make_all_children_rasters = function(st, model_objects, time_points = NULL){
     #submit qsubs
     jobs = lapply(1:nrow(child_ras_grid), function(x) sge_run_make_child_raster(st = st,
                                                                                 model_obj_name = child_ras_grid[x,get('models')],
-                                                                                time_position = child_ras_grid[x,get('models')]))
+                                                                                time_position = child_ras_grid[x,get('time_position')]))
     #submit hold job
     sge_hold_via_sync(st, 'holder', jobs)
 
