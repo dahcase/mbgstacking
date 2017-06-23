@@ -38,7 +38,7 @@ make_all_children_rasters = function(st, model_objects, time_points = NULL){
                                 indicator_family = st$general_settings$indicator_family), mc.cores = st$general_settings$cores, mc.preschedule = F)
   }else{
     #save model_objects to working folder
-    saveRDS(model_objects, paste0(st$general_settings$sge_parameters$working_folder, 'model_objects'))
+    saveRDS(model_objects, paste0(st$general_settings$sge_parameters$working_folder, 'model_objects.rds'))
 
     #submit qsubs
     jobs = lapply(1:nrow(child_ras_grid), function(x) sge_run_make_child_raster(st = st,
