@@ -8,6 +8,7 @@
 #' @param indicator_family character. Model family
 #' @import data.table
 #' @importFrom stats na.omit predict setNames
+#' @export
 #'
 make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NULL, indicator_family = 'binomial'){
 
