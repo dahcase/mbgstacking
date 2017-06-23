@@ -28,127 +28,40 @@ make_all_children_rasters = function(st, model_objects, time_points = NULL){
   stopifnot(nrow(child_ras_grid)>0)
 
   #make rasters from the selected child models-- this probably won't scale super well
-  raster_objects = parallel::mclapply(1:nrow(child_ras_grid),
-                            function(x) make_child_raster(
-                              model_obj = model_objects[[child_ras_grid[x,get('models')]]],
-                              model_settings = st$models[[child_ras_grid[x,get('models')]]],
-                              covs = lapply(st$covariate_layers, function(cl) fetch_covariate_layer(cl, child_ras_grid[x, get('time_position')])),
-                              cs_df = st$cs_df,
-                              indicator_family = st$general_settings$indicator_family), mc.cores = st$general_settings$cores, mc.preschedule = F)
+  if(is.null(st$general_settings$sge_parameters)){
+    raster_objects = parallel::mclapply(1:nrow(child_ras_grid),
+                              function(x) make_child_raster(
+                                model_obj = model_objects[[child_ras_grid[x,get('models')]]],
+                                model_settings = st$models[[child_ras_grid[x,get('models')]]],
+                                covs = lapply(st$covariate_layers, function(cl) fetch_covariate_layer(cl, child_ras_grid[x, get('time_position')])),
+                                cs_df = st$cs_df,
+                                indicator_family = st$general_settings$indicator_family), mc.cores = st$general_settings$cores, mc.preschedule = F)
+  }else{
+    #save model_objects to working folder
+    saveRDS(model_objects, paste0(st$general_settings$sge_parameters$working_folder, 'model_objects'))
+
+    #submit qsubs
+    jobs = lapply(1:nrow(child_ras_grid), function(x) sge_run_make_child_raster(st = st,
+                                                                                model_obj_name = child_ras_grid[x,get('models')],
+                                                                                time_position = child_ras_grid[x,get('models')]))
+    #submit hold job
+    sge_hold_via_sync(st, 'holder', jobs)
+
+    #load results
+    child_ras_grid = child_ras_grid[, files:= paste(get('models'), get('time_position'), sep = '_')]
+    req_files = paste0(st$general_settings$sge_parameters$working_folder, child_ras_grid[,get('files')], '.rds')
+    stopifnot(all(file.exists(req_files)))
+
+    #read in the results
+    raster_objects = lapply(req_files, readRDS)
+  }
+
   #create raster bricks
   #make row ids on the child ras grid
   child_ras_grid = child_ras_grid[,('rid') := 1:.N]
   raster_objects = setNames(lapply(unique(child_ras_grid[,get('models')]), #for each model
                                           function(x) raster::brick(raster_objects[child_ras_grid[get('models') == x, get('rid')]])),
                             unique(child_ras_grid[,get('models')]))
-  #raster_objects = mclapply(1:unique)
   return(raster_objects)
 }
 
-
-#' Make rasters from the child model objects
-#'
-#' Using model fits from run_stacking_child_models, creates rasters
-#' @param model_obj a model object from stacking
-#' @param model_settings list. result of a model init giving the instructions on how to fit the model
-#' @param covs a named list of rasters,
-#' @param cs_df center scaling df
-#' @param indicator_family character. Model family
-#' @import data.table
-#' @importFrom stats na.omit predict setNames
-#'
-make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NULL, indicator_family = 'binomial'){
-
-  #convert rasters into a data table
-  dm = data.table::data.table(raster::as.data.frame(raster::stack(covs), xy = T))
-
-  #make a row id
-  dm = dm[, ('row_id') := 1:.N]
-
-  #create a template
-  template = dm[, c('x','y','row_id'), with = F]
-
-  #centre scale
-  if(!is.null(cs_df)){
-    cs_dm = centreScale(dm[,names(covs), with = F], df = cs_df)
-    dm = cbind(dm[,c('x','y', 'row_id')], cs_dm)
-  }
-
-  #drop rows with NAs
-  dm = na.omit(dm)
-  good_rows = dm[,'row_id', with = F]
-
-  #begin predicting rasters
-  #if a gam
-  if(inherits(model_obj, 'gam')){
-
-    ret_obj = predict(model_obj, newdata =dm, type = 'response')
-    ret_obj = data.table::data.table(ret_obj)
-    setnames(ret_obj, 'ret_obj')
-
-  } else if(inherits(model_obj, 'glmnet')){
-
-    #glmnet requires a matrix
-    dm = as.matrix(dm)
-    ret_obj = predict(model_obj, newx = dm[,rownames(model_obj$beta)], s=model_obj$cv_1se_lambda, type = 'link')
-
-    #if the family is binomial, back transform-- either from native logit or emperical logit
-    if(indicator_family == 'binomial'){
-      ret_obj = invlogit(ret_obj)
-    }
-
-    #convert to a data table
-    ret_obj = data.table::data.table(ret_obj)
-    setnames(ret_obj, 'ret_obj')
-
-  } else if(inherits(model_obj, 'earth')){
-
-    ret_obj = data.table(predict(model_obj, newdata=dm, type = 'response'))
-    setnames(ret_obj, 'ret_obj')
-
-  } else if (inherits(model_obj, 'xgb.Booster') | inherits(model_obj, 'raw')){
-
-    if(class(model_obj)=='raw'){
-      model_obj = xgboost::xgb.load(model_obj)
-    }
-
-    #create new data object for xgboost
-    dm = xgboost::xgb.DMatrix(data = as.matrix(dm[,names(covs), with = F])) #not sure this subsetting is 100% strong
-
-    ret_obj = data.table::data.table(ret_obj = predict(model_obj, newdata = dm))
-
-    if(!is.null(model_settings)){
-      if(model_settings$emp_logit == T) ret_obj = invlogit(ret_obj)
-    }
-  }
-
-  #remove dm from memory
-  rm(dm)
-
-  #convert back into a raster
-  ret_obj = cbind(good_rows, ret_obj)
-
-  #restore to former glory
-  ret_obj= merge(template, ret_obj, by = 'row_id', all.x =T)
-  setorderv(ret_obj, 'row_id')
-  ret_obj = raster::rasterFromXYZ(ret_obj[,c('x','y','ret_obj')], res = raster::res(covs[[1]]), crs=raster::crs(covs[[1]]))
-
-  #return the object
-  return(setNames(ret_obj,model_settings$model_name))
-
-}
-
-#' Make rasters from the child model objects
-#'
-#' Using model fits from run_stacking_child_models, creates rasters
-#' @param ras raster-like. Raster like object
-#' @param time_position numeric. Location on the time scale but reduced to units of 1:max(time_scale)
-#'
-#'
-fetch_covariate_layer = function(ras, time_position = 1){
-  if(class(ras) == 'RasterBrick' | class(ras) == "RasterStack"){
-    return(ras[[time_position]])
-  } else{
-    return(ras)
-  }
-}

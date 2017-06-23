@@ -40,9 +40,9 @@ steak = init_stacker( enet_model, lasso_model,#earth_model, gam_model, lasso_mod
                    num_fold_cols = 5,
                    num_folds = 5,
                    cores = cores_to_use,
-                   sge_parameters = sgeset)
+                   sge_parameters = NULL)
 
- model_results = run_stacking_child_models(steak)
+# model_results = run_stacking_child_models(steak)
 #
 # child_ras = make_all_children_rasters(st = steak, model_objects = model_results[[2]], time_points = c(2000, 2005, 2010, 2015))
 #

@@ -387,6 +387,19 @@ sge_hold_via_sync = function(st, job_name = "holder", hold_on_jobs) {
   system(qsub)
 }
 
-
+#' Make rasters from the child model objects
+#'
+#' Using model fits from run_stacking_child_models, creates rasters
+#' @param ras raster-like. Raster like object
+#' @param time_position numeric. Location on the time scale but reduced to units of 1:max(time_scale)
+#' @export
+#'
+fetch_covariate_layer = function(ras, time_position = 1){
+  if(class(ras) == 'RasterBrick' | class(ras) == "RasterStack"){
+    return(ras[[time_position]])
+  } else{
+    return(ras)
+  }
+}
 
 
