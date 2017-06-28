@@ -81,7 +81,7 @@ sge_run_make_child_raster = function(st, model_obj_name, time_position){
     job_id = save_ras_name
   } else{
     job_id = system(qsub,intern =T)
-    job_id = strsplit(blerg, " ")
+    job_id = strsplit(job_id, " ")
 
     #keep only what is able to be numericed
     job_id = sapply(job_id, as.numeric)

@@ -106,7 +106,7 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
     job_id = save_model_name
   } else{
     job_id = system(qsub,intern =T)
-    job_id = strsplit(blerg, " ")
+    job_id = strsplit(job_id, " ")
 
     #keep only what is able to be numericed
     job_id = sapply(job_id, as.numeric)
