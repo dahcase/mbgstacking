@@ -106,7 +106,20 @@ sge_run_make_child_raster = function(st, model_obj_name, time_position){
   qsub = paste(qsub_call_parts, collapse = ' ')
 
   #launch the job and return the name for tracking
-  ifelse(Sys.info()[1]=='Windows', print(qsub),system(qsub))
-  return(save_ras_name)
+  #launch the job and return the name for tracking
+  if(Sys.info()[1]=='Windows'){
+    print(qsub)
+    job_id = save_ras_name
+  } else{
+    job_id = system(qsub,intern =T)
+    job_id = strsplit(blerg, " ")
+
+    #keep only what is able to be numericed
+    job_id = sapply(job_id, as.numeric)
+    job_id = job_id[!is.na(job_id)]
+
+  }
+
+  return(job_id)
   #return(qsub)
 }

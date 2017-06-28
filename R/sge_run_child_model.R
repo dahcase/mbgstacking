@@ -101,8 +101,19 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
   qsub = paste(qsub_call_parts, collapse = ' ')
 
   #launch the job and return the name for tracking
-  ifelse(Sys.info()[1]=='Windows', print(qsub),system(qsub))
-  return(save_model_name)
-  #return(qsub)
+  if(Sys.info()[1]=='Windows'){
+    print(qsub)
+    job_id = save_model_name
+  } else{
+    job_id = system(qsub,intern =T)
+    job_id = strsplit(blerg, " ")
+
+    #keep only what is able to be numericed
+    job_id = sapply(job_id, as.numeric)
+    job_id = job_id[!is.na(job_id)]
+
+  }
+
+  return(job_id)
 
 }
