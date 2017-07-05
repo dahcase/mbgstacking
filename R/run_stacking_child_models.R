@@ -44,7 +44,51 @@ run_stacking_child_models = function(st){
     #check to see if all the required files finished
     model_grid = model_grid[, files:= paste(get('model_name'), get('fold_columns'), get('fold_ids'), sep = '_')]
     req_files = paste0(st$general_settings$sge_parameters$working_folder, model_grid[,get('files')], '.rds')
-    stopifnot(all(file.exists(req_files)))
+
+    #check which models didn't work.
+    good_files = file.exists(req_files)
+
+    #if everything IS NOT working
+    if(!all(good_files)){
+      repeat_iter = 0
+      message(paste("These files do not exist:", req_files[!good_files]))
+
+      #rerun models to see if it was cluster problems
+      while(repeat_iter < st$general_settings$sge_parameters$repeat_iterations){
+        new_model_grid = model_grid[!good_files,]
+
+        #try rerunning
+        message(paste('Rerunning', nrow(new_model_grid), 'models. Iter:', repeat_iter))
+
+        jobs = lapply(1:nrow(new_model_grid), function(x) sge_run_child_model(
+          st = st,
+          st_function = paste0('fit_',get_model_type(st, new_model_grid[x,get('model_name')])),
+          model_name = new_model_grid[x,get('model_name')],
+          fold_col = new_model_grid[x,get('fold_columns')],
+          fold_id = new_model_grid[x,get('fold_ids')],
+          return_model_obj = new_model_grid[x,get('return_model_obj')]))
+
+        #hold to see if things work
+        sge_hold_via_sync(st, 'holder', jobs)
+
+        #get the files that should exist
+        req_files = paste0(st$general_settings$sge_parameters$working_folder, model_grid[,get('files')], '.rds')
+        good_files = file.exists(req_files)
+
+        if(all(good_files)){
+          repeat_iter = st$general_settings$sge_parameters$repeat_iterations
+        }
+
+        repeat_iter = repeat_iter + 1
+      }
+
+      if(!all(good_files)){
+        message('Not all models worked/finished')
+        message(paste(req_files[!good_files]))
+        stop()
+      }
+
+    }
 
     #read in the results
     stacking_models = lapply(req_files, readRDS)

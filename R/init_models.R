@@ -192,13 +192,14 @@ init_penalized =function(model_name = 'pen',  arguments = list(alpha = 1), emp_l
 #' @param other_options character string. Character string of additional options to pass to qsub
 #' @param slots_per_job numeric. Denotes the number of slots to be requested by each submodel. Leave null for automatic calculation (based on dataset size)
 #' @param package_location character string. Denotes the location where mbgstacking is installed (to be passed to the qsubs)
+#' @param repeat_iterations numeric: How many times should jobs be relaunched if they don't work the first time.
 #' @param conda_source file path. Denotes the location where a conda environment activate option is. Not implemented.
 #' @param conda_env file path. File path to the name of the conda environment. Not implemented.
 #' @param write_shell logical. Should the qsub be run via writing shell scripts. If F, qsubs are lanunched via the "-b y" flag
 #' @return List of lists containing the input parameters to be passed to the stacker
 #' @export
 #'
-init_sge = function(working_folder, r_path, output_files = NULL, error_files = NULL, project_name = NULL, other_options = NULL, slots_per_job = 2, package_location = NULL, conda_activate = NULL, conda_env = NULL, write_shell = F){
+init_sge = function(working_folder, r_path, output_files = NULL, error_files = NULL, project_name = NULL, other_options = NULL, slots_per_job = 2, package_location = NULL, repeat_iterations = 0, conda_activate = NULL, conda_env = NULL, write_shell = F){
 
   output <- error <- project <- NULL
 
