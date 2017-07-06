@@ -23,9 +23,15 @@ ridge_model = init_penalized('ridge', arguments = list(alpha = 0))
 enet_model = init_penalized('ridge', arguments = list(alpha = .52))
 brt_model = init_brt()
 
-sgeset =init_sge(working_folder = 'C:/Users/dccasey/Documents/illness_mapping/test_stacking', rscript_path = 'C:/Users/dccasey/ownCloud/ihme_work/stackin/sssa_v9.Rdata', output_files= '/dev/null', error_files = '/dev/null',
-                  project_name = 'project_geospatial', other_options = NULL, slots_per_job = 3 ,package_location = NULL)
+sgeset =init_sge(working_folder = 'C:/Users/dccasey/Documents/illness_mapping/test_stacking', r_path = 'C:/Users/dccasey/ownCloud/ihme_work/stackin/sssa_v9.Rdata', output_files= '/dev/null', error_files = '/dev/null',
+                  project_name = 'project_geospatial', other_options = NULL, slots_per_job = c(10,13) ,package_location = NULL)
 
+#manually specify folds
+df = df[, help_me := round(runif(nrow(df), 0, 1))]
+df = df[, where_am_i := round(runif(nrow(df), 0, 1))]
+
+all_fixed_effects = 'access + distrivers + evi'
+all_cov_layers = all_cov_layers[[c('access', 'distrivers', 'evi')]]
 #create the stacker governor
 steak = init_stacker( enet_model, lasso_model,#earth_model, gam_model, lasso_model,ridge_model, enet_model,brt_model, #em_def, em_chg, enet, gm_def,
                    data = df,
@@ -37,12 +43,15 @@ steak = init_stacker( enet_model, lasso_model,#earth_model, gam_model, lasso_mod
                    time_var = 'year',
                    time_scale = 2000:2016,
                    weight_col = NULL,
-                   num_fold_cols = 5,
+                   num_fold_cols = c('help_me', 'where_am_i'),
                    num_folds = 5,
-                   cores = cores_to_use,
+                   cores = 1,
                    sge_parameters = NULL)
 
-# model_results = run_stacking_child_models(steak)
+
+model_results = run_stacking_child_models(steak)
+
+
 #
 # child_ras = make_all_children_rasters(st = steak, model_objects = model_results[[2]], time_points = c(2000, 2005, 2010, 2015))
 #

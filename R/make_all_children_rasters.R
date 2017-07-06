@@ -48,7 +48,7 @@ make_all_children_rasters = function(st, model_objects, time_points = NULL){
     sge_hold_via_sync(st, 'holder', jobs)
 
     #load results
-    child_ras_grid = child_ras_grid[, files:= paste(get('models'), get('time_position'), sep = '_')]
+    child_ras_grid = child_ras_grid[, ('files'):= paste(get('models'), get('time_position'), sep = '_')]
     req_files = paste0(st$general_settings$sge_parameters$working_folder, child_ras_grid[,get('files')], '.rds')
     stopifnot(all(file.exists(req_files)))
 

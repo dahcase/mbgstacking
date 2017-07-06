@@ -42,7 +42,7 @@ run_stacking_child_models = function(st){
     sge_hold_via_sync(st, 'holder', jobs)
 
     #check to see if all the required files finished
-    model_grid = model_grid[, files:= paste(get('model_name'), get('fold_columns'), get('fold_ids'), sep = '_')]
+    model_grid = model_grid[, ('files'):= paste(get('model_name'), get('fold_columns'), get('fold_ids'), sep = '_')]
     req_files = paste0(st$general_settings$sge_parameters$working_folder, model_grid[,get('files')], '.rds')
 
     #check which models didn't work.
@@ -112,19 +112,19 @@ run_stacking_child_models = function(st){
 
   #condense into full pred and cv pred
   #full preds
-  preds = preds[,paste0(names(st$models),'_full_pred') := mget(paste0(names(st$models),'.NA.NA'))]
-
+  preds = setnames(preds, paste0(names(st$models),'.NA.NA'),paste0(names(st$models),'_full_pred'))
   #condense cv preds and create an object for return
   #select the required columns into a new dataset
-  cv_preds = lapply(names(st$models), function(x) preds[,grep(paste0(x,'.sfold_'), names(preds), value = T), with =F ])
-  cv_preds = lapply(cv_preds, function(x) rowMeans(x, na.rm =T))
-  cv_preds = data.table(do.call(cbind, cv_preds))
-  names(cv_preds) = paste0(names(st$models),'_cv_pred')
+
+  cv_preds = preds[,!grep('_full_pred', names(preds), fixed = T, value =T), with =F]
+  cv_preds = cv_preds[, lapply(names(st$models), function(x) rowMeans(cv_preds[, grep(x, names(cv_preds), value = T), with = F], na.rm = T))]
+  setnames(cv_preds,  paste0(names(st$models),'_cv_pred'))
 
   #create return dataset with full predictions and cv predictions
   all_preds = cbind(preds[,paste0(names(st$models),'_full_pred'),with =F],cv_preds)
   #add rid
   all_preds = cbind(st$data[,'rid', with = F], all_preds)
+
   #fix model names
   names(model_objs) = names(st$models)
 
