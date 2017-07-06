@@ -50,7 +50,52 @@ make_all_children_rasters = function(st, model_objects, time_points = NULL){
     #load results
     child_ras_grid = child_ras_grid[, ('files'):= paste(get('models'), get('time_position'), sep = '_')]
     req_files = paste0(st$general_settings$sge_parameters$working_folder, child_ras_grid[,get('files')], '.rds')
-    stopifnot(all(file.exists(req_files)))
+
+    #check which models didn't work.
+    good_files = file.exists(req_files)
+
+    #if everything IS NOT working
+    if(!all(good_files)){
+      repeat_iter = 0
+      message(paste("These files do not exist:", req_files[!good_files]))
+
+      #rerun models to see if it was cluster problems
+      while(repeat_iter < st$general_settings$sge_parameters$repeat_iterations){
+        new_model_grid = child_ras_grid[!good_files,]
+
+        #try rerunning
+        message(paste('Rerunning', nrow(new_model_grid), 'models. Iter:', repeat_iter))
+
+        #submit qsubs
+        jobs = lapply(1:nrow(new_model_grid), function(x) sge_run_make_child_raster(st = st,
+                                                                                    model_obj_name = new_model_grid[x,get('models')],
+                                                                                    time_position = new_model_grid[x,get('time_position')]))
+
+        #hold to see if things work
+        sge_hold_via_sync(st, paste0('holder_repeat', repeat_iter) , jobs)
+
+        #get the files that should exist
+        req_files = paste0(st$general_settings$sge_parameters$working_folder, child_ras_grid[,get('files')], '.rds')
+        good_files = file.exists(req_files)
+
+        if(all(good_files)){
+          repeat_iter = st$general_settings$sge_parameters$repeat_iterations
+        }
+
+        repeat_iter = repeat_iter + 1
+      }
+
+      #if after a few iterations, things haven't finished. call it and complain
+      if(!all(good_files)){
+        message('Not all models worked/finished')
+        message(paste(req_files[!good_files]))
+        stop()
+      }
+
+    }
+
+
+
 
     #read in the results
     raster_objects = lapply(req_files, readRDS)
