@@ -56,11 +56,14 @@ init_stacker = function(..., data, indicator, indicator_family, covariate_layers
   if(is.character(num_fold_cols)){
     #rename the fold columns
     folds = num_fold_cols
-    num_folds = 1:length(unique(govner$data[,get(folds[1])]))
+    fold_vals = unique(govner$data[,get(folds[1])])
+    fold_names = folds
 
   }else{
     folds = make_stacking_folds(nrow(govner$data), numfolds = num_folds, numsets = num_fold_cols)
     govner$data = cbind(govner$data, folds)
+    fold_names = names(folds)
+    fold_vals = unique(folds[,1])
   }
 
 
@@ -83,8 +86,8 @@ init_stacker = function(..., data, indicator, indicator_family, covariate_layers
   govner$data[,('rid') := 1:nrow(govner$data)]
 
   #add to general settings
-  govner$general_settings$fold_cols = names(folds)
-  govner$general_settings$fold_ids = 1:num_folds
+  govner$general_settings$fold_cols = fold_names
+  govner$general_settings$fold_ids = fold_vals
 
   #add time settings
   govner$general_settings$time_var = time_var
@@ -190,16 +193,16 @@ init_penalized =function(model_name = 'pen',  arguments = list(alpha = 1), emp_l
 #' @param error_files character string. Location where the error (.e) files are save
 #' @param project_name character string. Cluster project
 #' @param other_options character string. Character string of additional options to pass to qsub
-#' @param slots_per_job numeric. Denotes the number of slots to be requested by each submodel. Leave null for automatic calculation (based on dataset size)
+#' @param slots_per_job numeric. Denotes the number of slots to be requested by each submodel. If length>1, first item is passed to child models and second to raster creation
 #' @param package_location character string. Denotes the location where mbgstacking is installed (to be passed to the qsubs)
 #' @param repeat_iterations numeric: How many times should jobs be relaunched if they don't work the first time.
-#' @param conda_source file path. Denotes the location where a conda environment activate option is. Not implemented.
+#' @param conda_activate file path. Denotes the location where a conda environment activate option is. Not implemented.
 #' @param conda_env file path. File path to the name of the conda environment. Not implemented.
 #' @param write_shell logical. Should the qsub be run via writing shell scripts. If F, qsubs are lanunched via the "-b y" flag
 #' @return List of lists containing the input parameters to be passed to the stacker
 #' @export
 #'
-init_sge = function(working_folder, r_path, output_files = NULL, error_files = NULL, project_name = NULL, other_options = NULL, slots_per_job = 2, package_location = NULL, repeat_iterations = 0, conda_activate = NULL, conda_env = NULL, write_shell = F){
+init_sge = function(working_folder, r_path, output_files = NULL, error_files = NULL, project_name = NULL, other_options = NULL, slots_per_job = c(3,5), package_location = NULL, repeat_iterations = 0, conda_activate = NULL, conda_env = NULL, write_shell = F){
 
   output <- error <- project <- NULL
 
@@ -216,6 +219,14 @@ init_sge = function(working_folder, r_path, output_files = NULL, error_files = N
   sge_command = sge_command[!is.null(sge_command)]
   sge_command = paste(sge_command, collapse = " ")
 
-  return(list(working_folder = working_folder, r_path = r_path, sge_command = sge_command, slots_per_job = slots_per_job, package_location = package_location, conda_activate = conda_activate, conda_env = conda_env, write_shell = write_shell))
+  #slotting
+  if(length(slots_per_job)>1){
+    child_model_slots = slots_per_job[1]
+    raster_slots = slots_per_job[2]
+  } else{
+    child_model_slots <- raster_slots <- slots_per_job
+  }
+
+  return(list(working_folder = working_folder, r_path = r_path, sge_command = sge_command, child_model_slots = child_model_slots, raster_slots = raster_slots, package_location = package_location, conda_activate = conda_activate, conda_env = conda_env, write_shell = write_shell))
 
 }

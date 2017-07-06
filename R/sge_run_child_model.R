@@ -17,7 +17,7 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
   #shorten the names of some things
   r_path = st$general_settings$sge_parameters$r_path
   package_location = st$general_settings$sge_parameters$package_location
-  slots_per_job = st$general_settings$sge_parameters$slots_per_job
+  slots_per_job = st$general_settings$sge_parameters$child_model_slots
   sgecommand = st$general_settings$sge_parameters$sge_command
   working_folder = st$general_settings$sge_parameters$working_folder
   write_shell = st$general_settings$sge_parameters$write_shell
@@ -29,7 +29,6 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
 
   #if so, make sure st_function is valid
   stopifnot(!is.null(get(st_function)))
-
 
   #check to make sure r_path exists
   stopifnot(file.exists(r_path))

@@ -1,30 +1,17 @@
 #' Run a child model of the stacker using Sun Grid Engine
 #'
 #' @param st stacker governer object
-#' @param st_function character. The name of the model function to be run, not the function itself
-#' @param model_name character. name of the model to be run
-#' @param fold_col character vector. Denotes the name of the column designating the fold for crossval
-#' @param fold_id Numeric. Designates the value in fold col that should be held out
-#' @param return_model_obj logical. Denotes whether the function should return the earth object or just predictions.
+#' @param model_obj_name character. The model object name
+#' @param time_position numeric. relative position within the time scale that a raster should be generated
 #' @return character string. Name of the sge launched
 #' @import data.table
 #' @export
 #'
-
-#make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NULL, indicator_family = 'binomial')
-# raster_objects = parallel::mclapply(1:nrow(child_ras_grid),
-#                                     function(x) make_child_raster(
-#                                       model_obj = model_objects[[child_ras_grid[x,get('models')]]],
-#                                       model_settings = st$models[[child_ras_grid[x,get('models')]]],
-#                                       covs = lapply(st$covariate_layers, function(cl) fetch_covariate_layer(cl, child_ras_grid[x, get('time_position')])),
-#                                       cs_df = st$cs_df,
-#                                       indicator_family = st$general_settings$indicator_family), mc.cores = st$general_settings$cores, mc.preschedule = F)
-
 sge_run_make_child_raster = function(st, model_obj_name, time_position){
 
   r_path = st$general_settings$sge_parameters$r_path
   package_location = st$general_settings$sge_parameters$package_location
-  slots_per_job = st$general_settings$sge_parameters$slots_per_job
+  slots_per_job = st$general_settings$sge_parameters$raster_slots
   sgecommand = st$general_settings$sge_parameters$sge_command
   working_folder = st$general_settings$sge_parameters$working_folder
   write_shell = st$general_settings$sge_parameters$write_shell

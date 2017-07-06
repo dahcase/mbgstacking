@@ -9,15 +9,9 @@ sge_run_make_child_raster(st, model_obj_name, time_position)
 \arguments{
 \item{st}{stacker governer object}
 
-\item{st_function}{character. The name of the model function to be run, not the function itself}
+\item{model_obj_name}{character. The model object name}
 
-\item{model_name}{character. name of the model to be run}
-
-\item{fold_col}{character vector. Denotes the name of the column designating the fold for crossval}
-
-\item{fold_id}{Numeric. Designates the value in fold col that should be held out}
-
-\item{return_model_obj}{logical. Denotes whether the function should return the earth object or just predictions.}
+\item{time_position}{numeric. relative position within the time scale that a raster should be generated}
 }
 \value{
 character string. Name of the sge launched
