@@ -4,6 +4,7 @@
 #'
 #' @param ... Initialized models. If blank, default versions of earth and gam are created.
 #' @param data data table. Dataset to be machine learned.
+#' @param inlist logical. Are the models being passed through ... already in a list format?
 #' @param indicator character vector. Name of the indicator (and by extension) the column name of the dependant variable
 #' @param indicator_family character vector. Designates the statistical family that should be modeled. Usually 'binomial' or 'gaussian'
 #' @param covariate_layers list of raster like objects. A named list of raster like objects of covariates
@@ -23,7 +24,7 @@
 #' @importFrom stats na.omit
 #' @export
 #'
-init_stacker = function(..., data, indicator, indicator_family, covariate_layers, fe_equation, centre_scale = T, time_var = 'year',
+init_stacker = function(..., inlist = T, data, indicator, indicator_family, covariate_layers, fe_equation, centre_scale = T, time_var = 'year',
                         time_scale = c(2000,2005,2010,2015), weight_col = NULL, num_fold_cols = 1, num_folds = 1, cores = 1, sge_parameters = NULL){
 
   #if no child modules have been passed, make the default suite
@@ -31,8 +32,12 @@ init_stacker = function(..., data, indicator, indicator_family, covariate_layers
     m1 = init_earth()
     m2 = init_gam()
     models = list(m1, m2)
-  } else {
+  } else{
     models = list(...)
+  }
+  
+  if(inlist){
+    models = models[[1]]
   }
 
   #test to make sure all items in ... are stacker children

@@ -4,13 +4,15 @@
 \alias{init_stacker}
 \title{Initialize stacker}
 \usage{
-init_stacker(..., data, indicator, indicator_family, covariate_layers,
-  fe_equation, centre_scale = T, time_var = "year", time_scale = c(2000,
-  2005, 2010, 2015), weight_col = NULL, num_fold_cols = 1, num_folds = 1,
-  cores = 1, sge_parameters = NULL)
+init_stacker(..., inlist = T, data, indicator, indicator_family,
+  covariate_layers, fe_equation, centre_scale = T, time_var = "year",
+  time_scale = c(2000, 2005, 2010, 2015), weight_col = NULL,
+  num_fold_cols = 1, num_folds = 1, cores = 1, sge_parameters = NULL)
 }
 \arguments{
 \item{...}{Initialized models. If blank, default versions of earth and gam are created.}
+
+\item{inlist}{logical. Are the models being passed through ... already in a list format?}
 
 \item{data}{data table. Dataset to be machine learned.}
 
