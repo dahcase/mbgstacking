@@ -51,7 +51,8 @@ run_stacking_child_models = function(st){
     #if everything IS NOT working
     if(!all(good_files)){
       repeat_iter = 0
-      message(paste("These files do not exist:", req_files[!good_files]))
+      #alert the error log which files do not exist
+      lapply(paste("These files do not exist: ", req_files[!good_files], jobs[!good_files]), message)
 
       #rerun models to see if it was cluster problems
       while(repeat_iter < st$general_settings$sge_parameters$repeat_iterations){
