@@ -35,7 +35,7 @@ init_stacker = function(..., inlist = T, data, indicator, indicator_family, cova
   } else{
     models = list(...)
   }
-  
+
   if(inlist){
     models = models[[1]]
   }
@@ -232,6 +232,7 @@ init_sge = function(working_folder, r_path, output_files = NULL, error_files = N
     child_model_slots <- raster_slots <- slots_per_job
   }
 
-  return(list(working_folder = working_folder, r_path = r_path, sge_command = sge_command, child_model_slots = child_model_slots, raster_slots = raster_slots, package_location = package_location, conda_activate = conda_activate, conda_env = conda_env, write_shell = write_shell))
+  return(list(working_folder = working_folder, r_path = r_path, sge_command = sge_command, child_model_slots = child_model_slots, raster_slots = raster_slots,
+              package_location = package_location, repeat_iterations = repeat_iterations, conda_activate = conda_activate, conda_env = conda_env, write_shell = write_shell))
 
 }
