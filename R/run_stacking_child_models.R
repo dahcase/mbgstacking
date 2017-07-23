@@ -85,8 +85,8 @@ run_stacking_child_models = function(st){
 
       if(!all(good_files)){
         message('Not all models worked/finished')
-        message(paste(req_files[!good_files]))
-        stop()
+        lapply(paste(req_files[!good_files], jobs[!good_files]), message)
+        stop('Not all models worked/finished')
       }
 
     }
