@@ -5,7 +5,7 @@
 \title{Initialize a brt model}
 \usage{
 init_brt(model_name = "brt", arguments = list(), params_arg = list(nthread
-  = 1), nrounds = 10, emp_logit = F)
+  = 1), nrounds = 10, binomial_evaluation = "prev")
 }
 \arguments{
 \item{model_name}{name of the brt model}
@@ -18,8 +18,8 @@ See help xgboost::xgb.train for more information}
 
 \item{nrounds}{numeric. Max number of iterations}
 
-\item{emp_logit}{logical. Whether a binomial model should be be transformed using an emperical logit function instead of using the poisson approximation.
-xgboost's binomial approach is exclusive to 1s and 0s}
+\item{binomial_evaluation}{one of 'prev', 'poisson', or 'emplogit'. Prev fits on indicator/N with reg:logistic evaluation. 
+Poisson uses log(N) as an offset while modelling under a poission. Emplogit transforms things and runs under gaussian family}
 }
 \value{
 named list of lists with the parameters required to run an brt model

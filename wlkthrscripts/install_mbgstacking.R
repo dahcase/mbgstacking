@@ -22,14 +22,14 @@ devtools::install_github('dahcase/mbgstacking', lib = rpack)
 
 #r conda
 #with source activate on
-rpack = '/share/geospatial/stacking_packages_conda/'
-.libPaths('/share/geospatial/stacking_packages_conda/')
+rpack = '/share/geospatial/stack_pack/'
+.libPaths('/share/geospatial/stack_pack/')
 devtools::install_github('dahcase/mbgstacking', lib = rpack)
 
 #install mbg packages
 pos_packs = list.dirs('/home/j/temp/geospatial/packages',recursive = F, full.names = F)
-rpack = '/share/geospatial/stacking_packages_conda/'
-.libPaths('/share/geospatial/stacking_packages_conda/')
+rpack = '/share/geospatial/stack_pack/'
+.libPaths('/share/geospatial/stack_pack/')
 
 for(ppp in pos_packs){
   install.packages(ppp, lib = rpack)
