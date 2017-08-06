@@ -163,7 +163,7 @@ init_gam = function(model_name = 'gam',  arguments = list(spline_args = list(bs 
 #' @export
 #'
 init_brt = function(model_name = 'brt',  arguments = list(), params_arg = list(nthread = 1), nrounds = 10, binomial_evaluation = 'prev'){
-  model = list(model_name = model_name, model_type = 'xgb.train', args = arguments, params_arg = params_arg, nrounds = nrounds, binomial_evaluation)
+  model = list(model_name = model_name, model_type = 'xgb.train', args = arguments, params_arg = params_arg, nrounds = nrounds, binomial_evaluation = binomial_evaluation)
   return(model)
 }
 
