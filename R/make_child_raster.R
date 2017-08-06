@@ -71,7 +71,7 @@ make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NU
     ret_obj = data.table::data.table(ret_obj = predict(model_obj, newdata = dm))
 
     if(!is.null(model_settings)){
-      if(model_settings$emp_logit == T) ret_obj = invlogit(ret_obj)
+      if(model_settings$binomial-evaluation == 'emplogit') ret_obj = invlogit(ret_obj)
     }
   }
 
