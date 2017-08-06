@@ -80,7 +80,7 @@ fit_xgb.train= function(st, model_name = 'brt',fold_col = NULL, fold_id = NULL, 
 
   #create predictions
   output = predict(mod, newdata = newdata)
-  if(brt_params$emp_logit == T) output = invlogit(output)
+  if(brt_params$binomial_evaluation == 'emplogit') output = invlogit(output)
 
   output = data.table(rid = tetr$test_rows, prediction = output)
 

@@ -158,7 +158,7 @@ init_gam = function(model_name = 'gam',  arguments = list(spline_args = list(bs 
 #' @param params_arg named list. Arguments to be passed to the parameters argument of the xgboost::xgb.train function
 #' @param nrounds numeric. Max number of iterations
 #' @param binomial_evaluation one of 'prev', 'poisson', or 'emplogit'. Prev fits on indicator/N with reg:logistic evaluation. 
-#' Poisson uses log(N) as an offset while modelling under a poission. Emplogit transforms things and runs under gaussian family
+#' Poisson uses log(N) as an offset while modelling under a poisson. Emplogit transforms things and runs under gaussian family
 #' @return named list of lists with the parameters required to run an brt model
 #' @export
 #'
