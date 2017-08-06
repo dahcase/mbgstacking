@@ -157,13 +157,13 @@ init_gam = function(model_name = 'gam',  arguments = list(spline_args = list(bs 
 #'                              See help xgboost::xgb.train for more information
 #' @param params_arg named list. Arguments to be passed to the parameters argument of the xgboost::xgb.train function
 #' @param nrounds numeric. Max number of iterations
-#' @param emp_logit logical. Whether a binomial model should be be transformed using an emperical logit function instead of using the poisson approximation.
-#'                           xgboost's binomial approach is exclusive to 1s and 0s
+#' @param binomial_evaluation one of 'prev', 'poisson', or 'emplogit'. Prev fits on indicator/N with reg:logistic evaluation. 
+#' Poisson uses log(N) as an offset while modelling under a poission. Emplogit transforms things and runs under gaussian family
 #' @return named list of lists with the parameters required to run an brt model
 #' @export
 #'
-init_brt = function(model_name = 'brt',  arguments = list(), params_arg = list(nthread = 1), nrounds = 10, emp_logit = F){
-  model = list(model_name = model_name, model_type = 'xgb.train', args = arguments, params_arg = params_arg, nrounds = nrounds, emp_logit = emp_logit)
+init_brt = function(model_name = 'brt',  arguments = list(), params_arg = list(nthread = 1), nrounds = 10, binomial_evaluation = 'prev'){
+  model = list(model_name = model_name, model_type = 'xgb.train', args = arguments, params_arg = params_arg, nrounds = nrounds, binomial_evaluation)
   return(model)
 }
 

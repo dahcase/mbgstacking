@@ -25,19 +25,23 @@ fit_xgb.train= function(st, model_name = 'brt',fold_col = NULL, fold_id = NULL, 
 
   #make the train xgb.DMatrix
   if(indicator_family == 'binomial' | indicator_family == 'poisson'){
-    if(brt_params$emp_logit){
+    if(brt_params$binomial_evaluation == 'emplogit'){
       response_var = as.matrix(emplogit(st$data[tetr$train_rows,get(indicator)], st$data[tetr$train_rows,get('N')]))
       dm = xgboost::xgb.DMatrix(data = as.matrix(st$data[tetr$train_rows, st$general_settings$covs, with = F]),
                        label = response_var,
                        weight = as.matrix(st$data[tetr$train_rows,get('data_weight')]))
       indicator_family = 'gaussian'
-    } else{
+    } else if(brt_params$binomial_evaluation == 'poisson'){
       dm = xgboost::xgb.DMatrix(data = as.matrix(st$data[tetr$train_rows, st$general_settings$covs, with = F]),
                        label = as.matrix(st$data[tetr$train_rows, indicator, with = F]),
                        weight = as.matrix(st$data[tetr$train_rows,get('data_weight')]))
       #add the log offset
       xgboost::setinfo(dm, "base_margin", log(st$data[tetr$train_rows, get('N')]))
       indicator_family = 'poisson'
+    } else {
+      dm = xgboost::xgb.DMatrix(data = as.matrix(st$data[tetr$train_rows, st$general_settings$covs, with = F]),
+                                label = as.matrix(st$data[tetr$train_rows, get(indicator)/get('N'), with = F]),
+                                weight = as.matrix(st$data[tetr$train_rows,get('data_weight')]))
     }
 
   }else{
@@ -49,20 +53,21 @@ fit_xgb.train= function(st, model_name = 'brt',fold_col = NULL, fold_id = NULL, 
   #sort out the objective
   if(indicator_family == 'poisson') iobject = 'count:poisson'
   if(indicator_family == 'gaussian') iobject = 'reg:linear'
+  if(indicator_family == 'binomial') iobject = 'reg:logistic'
 
   #build the params argument-- add the objective and nthread where not otherwise specified
   additional_params = list(objective = iobject, nthread = sub_cores)
-  new_params = names(additional_params)[!names(additional_params) %in% names(brt_params$param_args)]
-  brt_params$param_args = append(brt_params$param_args, additional_params[new_params])
-
+  new_params = names(additional_params)[!names(additional_params) %in% names(brt_params$params_arg)]
+  brt_params$params_arg = append(brt_params$params_arg, additional_params[new_params])
+  
   #model call
   command = list(
-              params = brt_params$param_args,
-              data = dm,
-              nrounds = brt_params$nrounds,
-              verbose = 0)
-  command = append(command, sanitize_parameters(brt_params$args))
-
+    params = brt_params$params_arg,
+    data = dm,
+    nrounds = brt_params$nrounds,
+    verbose = 0)
+  command = append(command, mbgstacking:::sanitize_parameters(brt_params$args))
+  
   #dedupe
   command = command[!duplicated(command)]
 
