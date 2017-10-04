@@ -1,7 +1,7 @@
 Package: mbgstacking
 Type: Package
 Title: Stacked generalization ensemble model for model-based geostatistics
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Author: Daniel Casey
 Maintainer: Daniel Casey <dccasey@uw.edu>
 Description: A series of functions to implement MBG stacking.
@@ -15,6 +15,7 @@ Imports:
     mgcv,
     xgboost (>= 0.4),
     glmnet,
-    parallel
+    parallel,
+    scam
 RoxygenNote: 6.0.1
 Suggests: testthat

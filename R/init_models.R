@@ -157,7 +157,7 @@ init_gam = function(model_name = 'gam',  arguments = list(spline_args = list(bs 
 #'                              See help xgboost::xgb.train for more information
 #' @param params_arg named list. Arguments to be passed to the parameters argument of the xgboost::xgb.train function
 #' @param nrounds numeric. Max number of iterations
-#' @param binomial_evaluation one of 'prev', 'poisson', or 'emplogit'. Prev fits on indicator/N with reg:logistic evaluation. 
+#' @param binomial_evaluation one of 'prev', 'poisson', or 'emplogit'. Prev fits on indicator/N with reg:logistic evaluation.
 #' Poisson uses log(N) as an offset while modelling under a poisson. Emplogit transforms things and runs under gaussian family
 #' @return named list of lists with the parameters required to run an brt model
 #' @export
@@ -235,4 +235,19 @@ init_sge = function(working_folder, r_path, output_files = NULL, error_files = N
   return(list(working_folder = working_folder, r_path = r_path, sge_command = sge_command, child_model_slots = child_model_slots, raster_slots = raster_slots,
               package_location = package_location, repeat_iterations = repeat_iterations, conda_activate = conda_activate, conda_env = conda_env, write_shell = write_shell))
 
+}
+#' Initialize a scam model
+#'
+#' Creates an object designed to be passed to init_stacker that describes an scam::scam model be added to the stacking ensemble.
+#'
+#' @param model_name name of the scam model
+#' @param arguments named list. Arguments to be passed to the scam function. See ??scam::gam for more information
+#' @param formula formula or formula-like. Formula to be passed to the scam call that overwrites the underlying formula builder.
+#' This is useful if you want to have different covariates recieve different smoothing instructions
+#' @return named list of lists with the parameters required to run an scam model
+#' @export
+#'
+init_scam = function(model_name = 'scam',  arguments = list(spline_args = list(bs = 'ts', k = 3)), formula = NULL){
+  model = list(model_name = model_name, model_type = 'scam', args = arguments, formula = formula)
+  return(model)
 }

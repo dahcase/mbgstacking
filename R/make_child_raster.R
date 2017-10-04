@@ -15,6 +15,12 @@ make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NU
   #convert rasters into a data table
   dm = data.table::data.table(raster::as.data.frame(raster::stack(covs), xy = T))
 
+  #get a template raster
+  templateras = covs[[1]]
+  if(dim(templateras)[3]>1){
+    templateras = templateras[[1]]
+  }
+
   #make a row id
   dm = dm[, ('row_id') := 1:.N]
 
@@ -36,7 +42,6 @@ make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NU
   if(inherits(model_obj, 'gam')){
 
     ret_obj = predict(model_obj, newdata =dm, type = 'response')
-    ret_obj = data.table::data.table(ret_obj)
     setnames(ret_obj, 'ret_obj')
 
   } else if(inherits(model_obj, 'glmnet')){
@@ -50,14 +55,8 @@ make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NU
       ret_obj = invlogit(ret_obj)
     }
 
-    #convert to a data table
-    ret_obj = data.table::data.table(ret_obj)
-    setnames(ret_obj, 'ret_obj')
-
   } else if(inherits(model_obj, 'earth')){
-
-    ret_obj = data.table(predict(model_obj, newdata=dm, type = 'response'))
-    setnames(ret_obj, 'ret_obj')
+    ret_obj = predict(model_obj, newdata=dm, type = 'response')
 
   } else if (inherits(model_obj, 'xgb.Booster') | inherits(model_obj, 'raw')){
 
@@ -68,7 +67,7 @@ make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NU
     #create new data object for xgboost
     dm = xgboost::xgb.DMatrix(data = as.matrix(dm[,names(covs), with = F])) #not sure this subsetting is 100% strong
 
-    ret_obj = data.table::data.table(ret_obj = predict(model_obj, newdata = dm))
+    ret_obj = predict(model_obj, newdata = dm)
 
     if(!is.null(model_settings)){
       if(model_settings$binomial_evaluation == 'emplogit') ret_obj = invlogit(ret_obj)
@@ -78,13 +77,7 @@ make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NU
   #remove dm from memory
   rm(dm)
 
-  #convert back into a raster
-  ret_obj = cbind(good_rows, ret_obj)
-
-  #restore to former glory
-  ret_obj= merge(template, ret_obj, by = 'row_id', all.x =T)
-  setorderv(ret_obj, 'row_id')
-  ret_obj = raster::rasterFromXYZ(ret_obj[,c('x','y','ret_obj')], res = raster::res(covs[[1]]), crs=raster::crs(covs[[1]]))
+  templateras[good_rows] = ret_obj
 
   #return the object
   return(setNames(ret_obj,model_settings$model_name))
