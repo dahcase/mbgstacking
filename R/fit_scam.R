@@ -54,7 +54,7 @@ fit_scam = function(st, model_name = 'gam',fold_col = NULL, fold_id = NULL, retu
               data =st$data[tetr$train_rows, ],
               family = indicator_family,
               weights = st$data[tetr$train_rows,get('data_weight')])
-  command = append(command, sanitize_parameters(gam_params$args))
+  command = append(command, sanitize_parameters(scam_params$args))
   mod = do.call(scam::scam, args = command)
 
   #create predictions

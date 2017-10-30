@@ -59,15 +59,15 @@ fit_xgb.train= function(st, model_name = 'brt',fold_col = NULL, fold_id = NULL, 
   additional_params = list(objective = iobject, nthread = sub_cores)
   new_params = names(additional_params)[!names(additional_params) %in% names(brt_params$params_arg)]
   brt_params$params_arg = append(brt_params$params_arg, additional_params[new_params])
-  
+
   #model call
   command = list(
     params = brt_params$params_arg,
     data = dm,
     nrounds = brt_params$nrounds,
     verbose = 0)
-  command = append(command, mbgstacking:::sanitize_parameters(brt_params$args))
-  
+  command = append(command, sanitize_parameters(brt_params$args))
+
   #dedupe
   command = command[!duplicated(command)]
 
