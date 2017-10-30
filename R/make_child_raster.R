@@ -20,6 +20,7 @@ make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NU
   if(dim(templateras)[3]>1){
     templateras = templateras[[1]]
   }
+  templateras[] = NA #chop everything out just in case
 
   #make a row id
   dm = dm[, ('row_id') := 1:.N]
@@ -80,6 +81,6 @@ make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NU
   templateras[good_rows] = ret_obj
 
   #return the object
-  return(setNames(ret_obj,model_settings$model_name))
+  return(setNames(templateras,model_settings$model_name))
 
 }
