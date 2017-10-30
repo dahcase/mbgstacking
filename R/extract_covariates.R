@@ -84,7 +84,7 @@ extract_covariates = function(xyt, covariate_list, centre_scale = T, time_var = 
 
   #If only one time varying covariate, make the names behave
   if(length(tv_cov_col_names_uniq)==1){
-    xyt = xyt[,('variable'):= sub(paste0(tv_cov_col_names_uniq,'.'), "", variable, fixed = T)]
+    xyt = xyt[,('variable'):= sub(paste0(tv_cov_col_names_uniq,'.'), "", xyt[,get('variable')], fixed = T)]
   }
 
   #R has something funny where 1 == '1'. Although this is helpful in our case, I'm casting as an int, because such actions are weird
