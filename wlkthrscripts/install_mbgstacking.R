@@ -34,3 +34,6 @@ rpack = '/share/geospatial/stack_pack/'
 for(ppp in pos_packs){
   install.packages(ppp, lib = rpack)
 }
+
+
+

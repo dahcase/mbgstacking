@@ -23,31 +23,37 @@ fit_xgb.train= function(st, model_name = 'brt',fold_col = NULL, fold_id = NULL, 
   #make set and train
   tetr = make_test_train(st$data, fold_col = fold_col, fold_id = fold_id)
 
+  if(brt_params$weight_column ==""){
+    weight_col = brt_params$weight
+  }else{
+    weight_col = 'data_weight'
+  }
+
   #make the train xgb.DMatrix
   if(indicator_family == 'binomial' | indicator_family == 'poisson'){
     if(brt_params$binomial_evaluation == 'emplogit'){
       response_var = as.matrix(emplogit(st$data[tetr$train_rows,get(indicator)], st$data[tetr$train_rows,get('N')]))
       dm = xgboost::xgb.DMatrix(data = as.matrix(st$data[tetr$train_rows, st$general_settings$covs, with = F]),
                        label = response_var,
-                       weight = as.matrix(st$data[tetr$train_rows,get('data_weight')]))
+                       weight = as.matrix(st$data[tetr$train_rows,get(weight_col)]))
       indicator_family = 'gaussian'
     } else if(brt_params$binomial_evaluation == 'poisson'){
       dm = xgboost::xgb.DMatrix(data = as.matrix(st$data[tetr$train_rows, st$general_settings$covs, with = F]),
                        label = as.matrix(st$data[tetr$train_rows, indicator, with = F]),
-                       weight = as.matrix(st$data[tetr$train_rows,get('data_weight')]))
+                       weight = as.matrix(st$data[tetr$train_rows,get(weight_col)]))
       #add the log offset
       xgboost::setinfo(dm, "base_margin", log(st$data[tetr$train_rows, get('N')]))
       indicator_family = 'poisson'
     } else {
       dm = xgboost::xgb.DMatrix(data = as.matrix(st$data[tetr$train_rows, st$general_settings$covs, with = F]),
                                 label = as.matrix(st$data[tetr$train_rows, get(indicator)/get('N')]),
-                                weight = as.matrix(st$data[tetr$train_rows,get('data_weight')]))
+                                weight = as.matrix(st$data[tetr$train_rows,get(weight_col)]))
     }
 
   }else{
     dm = xgboost::xgb.DMatrix(data = as.matrix(st$data[tetr$train_rows, st$general_settings$covs, with = F]),
                      label = as.matrix(st$data[tetr$train_rows, indicator, with = F]),
-                     weight = as.matrix(st$data[tetr$train_rows,get('data_weight')]))
+                     weight = as.matrix(st$data[tetr$train_rows,get(weight_col)]))
   }
 
   #sort out the objective
@@ -59,15 +65,15 @@ fit_xgb.train= function(st, model_name = 'brt',fold_col = NULL, fold_id = NULL, 
   additional_params = list(objective = iobject, nthread = sub_cores)
   new_params = names(additional_params)[!names(additional_params) %in% names(brt_params$params_arg)]
   brt_params$params_arg = append(brt_params$params_arg, additional_params[new_params])
-  
+
   #model call
   command = list(
     params = brt_params$params_arg,
     data = dm,
     nrounds = brt_params$nrounds,
     verbose = 0)
-  command = append(command, mbgstacking:::sanitize_parameters(brt_params$args))
-  
+  command = append(command, sanitize_parameters(brt_params$args))
+
   #dedupe
   command = command[!duplicated(command)]
 
