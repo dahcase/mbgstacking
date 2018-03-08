@@ -6,7 +6,7 @@
 \usage{
 init_xgboost(model_name = "xgboost", arguments = list(),
   params_arg = list(nthread = 1), nrounds = 10,
-  binomial_evaluation = "prev")
+  binomial_evaluation = "prev", weight_column = "")
 }
 \arguments{
 \item{model_name}{name of the brt model}

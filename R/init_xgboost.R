@@ -15,7 +15,9 @@
 #' @return named list of lists with the parameters required to run an brt model
 #' @export
 #'
-init_xgboost = function(model_name = 'xgboost',  arguments = list(), params_arg = list(nthread = 1), nrounds = 10, binomial_evaluation = 'prev'){
-  model = list(model_name = model_name, model_type = 'xgb.train', args = arguments, params_arg = params_arg, nrounds = nrounds, binomial_evaluation = binomial_evaluation)
+init_xgboost = function(model_name = 'xgboost',  arguments = list(), params_arg = list(nthread = 1), nrounds = 10, binomial_evaluation = 'prev', weight_column = ""){
+  model = list(model_name = model_name, model_type = 'xgb.train', args = arguments,
+               params_arg = params_arg, nrounds = nrounds, binomial_evaluation = binomial_evaluation,
+               weight_column = weight_column)
   return(model)
 }
