@@ -18,7 +18,7 @@ sge_run_make_child_raster = function(st, model_obj_name, time_position){
   stopifnot(dir.exists(working_folder))
   stopifnot(file.exists(paste0(working_folder, "st.rds")))
   stopifnot(file.exists(paste0(working_folder, "model_objects.rds")))
-  stopifnot(file.exists(r_path))
+  #stopifnot(file.exists(r_path))
   shell_header = "#$ -S /bin/sh"
   library_call = paste0("library(mbgstacking , lib.loc = ",
                         addQuotes_s(package_location), ")")

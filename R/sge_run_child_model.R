@@ -31,7 +31,7 @@ sge_run_child_model = function(st, st_function = NULL, model_name = NULL, fold_c
   stopifnot(!is.null(get(st_function)))
 
   #check to make sure r_path exists
-  stopifnot(file.exists(r_path))
+  #stopifnot(file.exists(r_path))
 
   #check to make sure package_location is legit and has mbgstacking
   #todo
