@@ -88,7 +88,7 @@ extract_covariates = function(xyt, covariate_list, centre_scale = T, time_var = 
   }
 
   #R has something funny where 1 == '1'. Although this is helpful in our case, I'm casting as an int, because such actions are weird
-  xyt = xyt[, as.integer(get('variable'))]
+  xyt = xyt[, ('variable') := as.integer(get('variable'))]
 
   #keep only rows where there is data time/covariate time agreement
   xyt = xyt[get('time_id') == get('variable') ,]
