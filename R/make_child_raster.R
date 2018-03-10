@@ -36,7 +36,7 @@ make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NU
 
   #drop rows with NAs
   dm = na.omit(dm)
-  good_rows = dm[,'row_id', with = F]
+  good_rows = dm[,get('year')]
 
   #begin predicting rasters
   #if a gam
