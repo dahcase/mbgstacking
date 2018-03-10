@@ -23,7 +23,7 @@ fit_xgb.train= function(st, model_name = 'brt',fold_col = NULL, fold_id = NULL, 
   #make set and train
   tetr = make_test_train(st$data, fold_col = fold_col, fold_id = fold_id)
 
-  if(brt_params$weight_column ==""){
+  if(brt_params$weight_column !=""){
     weight_col = brt_params$weight
   }else{
     weight_col = 'data_weight'
