@@ -43,7 +43,7 @@ make_child_raster = function(model_obj, model_settings = NULL,  covs, cs_df = NU
   if(inherits(model_obj, 'gam')){
 
     ret_obj = predict(model_obj, newdata =dm, type = 'response')
-    setnames(ret_obj, 'ret_obj')
+    #setnames(ret_obj, 'ret_obj')
 
   } else if(inherits(model_obj, 'glmnet')){
 
