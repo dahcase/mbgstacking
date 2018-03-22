@@ -4,21 +4,10 @@
 \alias{sge_run_child_model}
 \title{Run a child model of the stacker using Sun Grid Engine}
 \usage{
-sge_run_child_model(st, st_function = NULL, model_name = NULL,
-  fold_col = NA, fold_id = NA, return_model_obj = F)
+sge_run_child_model(st)
 }
 \arguments{
 \item{st}{stacker governer object}
-
-\item{st_function}{character. The name of the model function to be run, not the function itself}
-
-\item{model_name}{character. name of the model to be run}
-
-\item{fold_col}{character vector. Denotes the name of the column designating the fold for crossval}
-
-\item{fold_id}{Numeric. Designates the value in fold col that should be held out}
-
-\item{return_model_obj}{logical. Denotes whether the function should return the earth object or just predictions.}
 }
 \value{
 character string. Name of the sge launched
