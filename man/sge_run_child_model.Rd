@@ -4,10 +4,14 @@
 \alias{sge_run_child_model}
 \title{Run a child model of the stacker using Sun Grid Engine}
 \usage{
-sge_run_child_model(st)
+sge_run_child_model(st, min_task = 1, max_task = 1)
 }
 \arguments{
 \item{st}{stacker governer object}
+
+\item{min_task}{integer. Starting task number. Generally refers to a row in st$model_grid}
+
+\item{max_task}{integer. Ending task number. Generally refers to a row in st$model_grid}
 }
 \value{
 character string. Name of the sge launched
