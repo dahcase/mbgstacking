@@ -15,7 +15,7 @@
 fit_gam = function(st, model_name = 'gam',fold_col = NULL, fold_id = NULL, return_model_obj = F){
 
   #subset the model parameters we need
-  gam_params = st$model[[model_name]]
+  gam_params = st$models[[model_name]]
   indicator_family = st$general_settings$indicator_family
   indicator = st$general_settings$indicator
 

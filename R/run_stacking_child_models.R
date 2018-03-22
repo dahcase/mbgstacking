@@ -10,13 +10,13 @@
 run_stacking_child_models = function(st){
 
   #build the grid to govern the mclapply call
-  model_grid = make_model_grid(st, add_parents = T)
-
+  model_grid = st$model_grid
   #run the models
   #if sge is null, use mclapply
   if(is.null(st$general_settings$sge_parameters)){
+
     stacking_models = parallel::mclapply(1:nrow(model_grid),
-                                        function(x) get(paste0('fit_',get_model_type(st, model_grid[x,get('model_name')])))(
+                                        function(x) get(model_grid[x,get('model_type')])(
                                           st = st,
                                           model_name = model_grid[x,get('model_name')],
                                           fold_col = model_grid[x,get('fold_columns')],
@@ -30,13 +30,11 @@ run_stacking_child_models = function(st){
     saveRDS(st, file = paste0(st$general_settings$sge_parameters$working_folder, 'st.rds'))
 
     #Launch jobs on sge
-    jobs = lapply(1:nrow(model_grid), function(x) sge_run_child_model(
-                                        st = st,
-                                        st_function = paste0('fit_',get_model_type(st, model_grid[x,get('model_name')])),
-                                        model_name = model_grid[x,get('model_name')],
-                                        fold_col = model_grid[x,get('fold_columns')],
-                                        fold_id = model_grid[x,get('fold_ids')],
-                                        return_model_obj = model_grid[x,get('return_model_obj')]))
+    joblaunch = sge_run_child_model(st, 1, nrow(st$model_grid))
+    jobs = system(joblaunch,intern = T)
+
+    #parse the array job
+    jobs = substr(jobs, 1, regexec('.', jobs, fixed = T)[[1]][1]-1)
 
     #launch a job held on all the sub jobs with sync
     sge_hold_via_sync(st, 'holder', jobs)
@@ -116,16 +114,19 @@ run_stacking_child_models = function(st){
   preds = setnames(preds, paste0(names(st$models),'.NA.NA'),paste0(names(st$models),'_full_pred'))
   #condense cv preds and create an object for return
   #select the required columns into a new dataset
-
   cv_preds = preds[,!grep('_full_pred', names(preds), fixed = T, value =T), with =F]
   cv_preds = cv_preds[, lapply(names(st$models), function(x) rowMeans(cv_preds[, grep(x, names(cv_preds), value = T), with = F], na.rm = T))]
   setnames(cv_preds,  paste0(names(st$models),'_cv_pred'))
 
   #create return dataset with full predictions and cv predictions
-  all_preds = cbind(preds[,paste0(names(st$models),'_full_pred'),with =F],cv_preds)
-  #add rid
-  all_preds = cbind(st$data[,'rid', with = F], all_preds)
-
+  #checks implicitly to see if holdouts were used
+  if(nrow(cv_preds)>0){
+    all_preds = cbind(preds[,paste0(names(st$models),'_full_pred'),with =F],cv_preds)
+    #add rid
+    all_preds = cbind(st$data[,'rid', with = F], all_preds)
+  }else{
+    all_preds = preds
+  }
   #fix model names
   names(model_objs) = names(st$models)
 

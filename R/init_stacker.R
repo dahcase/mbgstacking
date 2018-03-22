@@ -61,14 +61,26 @@ init_stacker = function(..., inlist = T, data, indicator, indicator_family, cova
   if(is.character(num_fold_cols)){
     #rename the fold columns
     folds = num_fold_cols
+
+    #check to make sure all fold columns have the same number/fold identifiers
+    fold_val_pos = lapply(folds, function(x) sort(unique(gover$data[,get(x)])))
+    fvp_check = unlist(lapply(fold_val_pos[2:length(fold_val_pos)], function(x) all.equal(fold_val_pos[[1]], x)))
+
+    if(!all(fvp_check)){
+      stop('Some of your fold columns do not have the same fold identifiers. Please fix this.')
+    }
+
     fold_vals = unique(govner$data[,get(folds[1])])
     fold_names = folds
 
-  }else{
+  }else if(num_fold_cols>0){
     folds = make_stacking_folds(nrow(govner$data), numfolds = num_folds, numsets = num_fold_cols)
     govner$data = cbind(govner$data, folds)
     fold_names = names(folds)
     fold_vals = unique(folds[,1])
+  }else{
+    fold_names = NA
+    fold_vals = NA
   }
 
 
@@ -113,6 +125,16 @@ init_stacker = function(..., inlist = T, data, indicator, indicator_family, cova
 
   ##add covariate layer pointers
   govner$covariate_layers = covariate_layers
+
+  #model grid
+  govner$model_grid = make_model_grid(govner, add_parents = T)
+
+  #add the model types
+  govner$model_grid$model_type = apply(govner$model_grid[,'model_name'], MARGIN = 1, function(x){(
+    paste0('fit_',get_model_type(govner, x)))
+  })
+
+
 
 
   return(govner)

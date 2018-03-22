@@ -360,11 +360,16 @@ make_model_grid = function(st, add_parents = T){
     fold_ids = st$general_settings$fold_ids, stringsAsFactors = F),
     return_model_obj = F)
 
+  #drop rows where fold is NA and return model object is false. This is to allow models without cross validation
+  model_grid = model_grid[!is.na(fold_columns),]
+
   #add the main model runs
   if(add_parents){
     main_mods = data.table(model_name = names(st$models), return_model_obj = T)
     model_grid = rbind(model_grid,main_mods, fill = T)
   }
+
+  return(unique(model_grid))
 
 }
 
