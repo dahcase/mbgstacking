@@ -17,7 +17,7 @@ run_model = function(st, task_id){
                fold_id = task_info$fold_ids,
                return_model_obj = task_info$return_model_obj)
 
-  save_model_name = paste(stask_info$model_name,  task_info$fold_columns, task_info$fold_ids, sep = '_')
+  save_model_name = paste(task_info$model_name,  task_info$fold_columns, task_info$fold_ids, sep = '_')
 
   saveRDS(mod, file.path(working_folder, save_model_name, '.rds'))
 

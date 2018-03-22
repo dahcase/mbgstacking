@@ -7,7 +7,7 @@
 #' @import data.table
 #' @export
 #'
-#st_function = NULL, model_name = NULL, fold_col = NA, fold_id = NA, return_model_obj = F
+#
 sge_run_child_model = function(st, min_task = 1, max_task = 1){
 
   #shorten the names of some things
