@@ -32,33 +32,21 @@ sge_run_child_model = function(st, min_task = 1, max_task = 1){
   library_call = paste0('library(mbgstacking , lib.loc = ', addQuotes_s(package_location),')')
 
   #get the sge variable
-  get_task_id = paste0('task_id = as.integer(Sys.getenv(', addQuotes_s('SGE_TASK_ID'),'))')
-
+  get_task_id = "task_id = as.integer(Sys.getenv('SGE_TASK_ID'))"
+  report_task = 'message(task_id)'
   st_path = paste0(working_folder,'st.rds')
   load_data = paste0('st = readRDS(',addQuotes_s(st_path),')')
-
-  model_call = paste0('(st', ', model_name = ','st$model_grid$model_name[task_id]',
-                      ', fold_col = ', 'st$model_grid$fold_columns[task_id]',
-                      ', fold_id = ', 'st$model_grid$fold_ids[task_id]',
-                      ', return_model_obj =', 'st$model_grid$return_model_obj[task_id]',')')
-
-  assign_model = 'themod <- mgbstacking::get(st$model_grid$model_type[task_id])'
-
-  run_model = paste0('themod',model_call)
-
-  gen_save_model_name = "save_model_name = paste(st$model_grid$model_name[task_id], st$model_grid$fold_ids[task_id], st$model_grid$fold_ids[task_id], sep = '_')"
-
-  save_results = paste0("saveRDS(mod, paste0(",addQuotes_s(working_folder), ",save_model_name, '.rds'))")
+  run_mod = 'run_model(st,task_id)'
 
   #add quotes to the command
-  the_commands = sapply(c(library_call,add_lib_paths, get_task_id, load_data,assign_model,run_model,gen_save_model_name, save_results), addQuotes_d)
+  the_commands = sapply(c(get_task_id, report_task, add_lib_paths, library_call, load_data, run_mod), addQuotes_d)
   the_commands = paste0(' -e ',paste(the_commands, collapse =' -e '))
 
   #set r commands
   r_commands = paste0(r_path, ' ', the_commands)
 
   #create the shell script
-  r_commands = paste('-b y', shQuote(r_commands))
+  r_commands = paste('-b y', shQuote(paste('SINGULARITYENV_SGE_TASK_ID=$SGE_TASK_ID', r_commands)))
 
   #qsub
   qsub_name = paste0('-N child_models')
