@@ -15,7 +15,7 @@ compile_submodels = function(st, stacking_models){
 
   #get the predictions
   #combine the predictions
-  preds = st$data[,.(rid)]
+  preds = st$data[,list(rid)]
 
   for(ppp in sapply(stacking_models,'[',1)){
     preds[ppp[,rid], (names(ppp)[2]) := ppp[[2]]]
