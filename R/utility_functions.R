@@ -354,6 +354,7 @@ addQuotes_s = function (x)
 #' @export
 #'
 make_model_grid = function(st, add_parents = T){
+  utils::globalVariables
   model_grid = data.table(expand.grid(
     model_name = names(st$models),
     fold_columns = st$general_settings$fold_cols,

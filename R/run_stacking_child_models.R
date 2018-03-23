@@ -39,7 +39,8 @@ run_stacking_child_models = function(st){
     sge_hold_via_sync(st, 'holder', jobs)
 
     #check to see if all the required files finished
-    good_files = check_submodels(st)[[1]]
+    subcheck = check_submodels(st)
+    good_files = subcheck[[1]]
 
     #if everything IS NOT working
     if(!all(good_files)){
@@ -77,7 +78,9 @@ run_stacking_child_models = function(st){
         message('Not all models worked/finished')
 
         #list broken files
-
+        for(fff in subcheck[[2]][subcheck[[1]]]){
+          message(paste('Missing:',fff))
+        }
 
         stop('Not all models worked/finished')
       }
@@ -85,7 +88,7 @@ run_stacking_child_models = function(st){
     }
 
     #read in the results
-    stacking_models = lapply(req_files, readRDS)
+    stacking_models = lapply(subcheck[[2]], readRDS)
   }
 
   return(compile_submodels(st, stacking_models))

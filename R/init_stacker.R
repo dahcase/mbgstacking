@@ -63,7 +63,7 @@ init_stacker = function(..., inlist = T, data, indicator, indicator_family, cova
     folds = num_fold_cols
 
     #check to make sure all fold columns have the same number/fold identifiers
-    fold_val_pos = lapply(folds, function(x) sort(unique(gover$data[,get(x)])))
+    fold_val_pos = lapply(folds, function(x) sort(unique(govner$data[,get(x)])))
     fvp_check = unlist(lapply(fold_val_pos[2:length(fold_val_pos)], function(x) all.equal(fold_val_pos[[1]], x)))
 
     if(!all(fvp_check)){
@@ -101,7 +101,7 @@ init_stacker = function(..., inlist = T, data, indicator, indicator_family, cova
   #omit missing rows and make row ids
   start = nrow(govner$data)
   govner$data = na.omit(govner$data, cols = govner$general_settings$covs)
-  end = nrow(govern$data)
+  end = nrow(govner$data)
 
   if(start != end){
     warnings(paste('Dropped', round(start/end,2)*100, 'percent of the dataset becausing of missing covariate values.'))
