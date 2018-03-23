@@ -10,18 +10,17 @@
 run_stacking_child_models = function(st){
 
   #build the grid to govern the mclapply call
-  model_grid = st$model_grid
   #run the models
   #if sge is null, use mclapply
   if(is.null(st$general_settings$sge_parameters)){
 
-    stacking_models = parallel::mclapply(1:nrow(model_grid),
-                                        function(x) get(model_grid[x,get('model_type')])(
+    stacking_models = parallel::mclapply(1:nrow(st$model_grid),
+                                        function(x) get(st$model_grid[x,get('model_type')])(
                                           st = st,
-                                          model_name = model_grid[x,get('model_name')],
-                                          fold_col = model_grid[x,get('fold_columns')],
-                                          fold_id = model_grid[x,get('fold_ids')],
-                                          return_model_obj = model_grid[x,get('return_model_obj')]),
+                                          model_name = st$model_grid[x,get('model_name')],
+                                          fold_col = st$model_grid[x,get('fold_columns')],
+                                          fold_id = st$model_grid[x,get('fold_ids')],
+                                          return_model_obj = st$model_grid[x,get('return_model_obj')]),
                                         mc.cores = st$general_settings$cores,mc.preschedule = F)
 
   } else{
@@ -40,39 +39,32 @@ run_stacking_child_models = function(st){
     sge_hold_via_sync(st, 'holder', jobs)
 
     #check to see if all the required files finished
-    model_grid = model_grid[, ('files'):= paste(get('model_name'), get('fold_columns'), get('fold_ids'), sep = '_')]
-    req_files = paste0(st$general_settings$sge_parameters$working_folder, model_grid[,get('files')], '.rds')
-
-    #check which models didn't work.
-    good_files = file.exists(req_files)
+    good_files = check_submodels(st)[[1]]
 
     #if everything IS NOT working
     if(!all(good_files)){
       repeat_iter = 0
       #alert the error log which files do not exist
-      lapply(paste("These files do not exist: ", req_files[!good_files], jobs[!good_files]), message)
+      for(ppp in paste("These jobs do not exist: ", paste0(jobs, which(!good_files)))){
+        message(ppp)
+      }
 
       #rerun models to see if it was cluster problems
       while(repeat_iter < st$general_settings$sge_parameters$repeat_iterations){
-        new_model_grid = model_grid[!good_files,]
 
         #try rerunning
-        message(paste('Rerunning', nrow(new_model_grid), 'models. Iter:', repeat_iter))
+        message(paste('Rerunning', length(good_files), 'models. Iter:', repeat_iter))
 
-        jobs = lapply(1:nrow(new_model_grid), function(x) sge_run_child_model(
-          st = st,
-          st_function = paste0('fit_',get_model_type(st, new_model_grid[x,get('model_name')])),
-          model_name = new_model_grid[x,get('model_name')],
-          fold_col = new_model_grid[x,get('fold_columns')],
-          fold_id = new_model_grid[x,get('fold_ids')],
-          return_model_obj = new_model_grid[x,get('return_model_obj')]))
+        #launch the guys
+        jobs = lapply(which(!good_files), function(x) sge_run_child_model(st, x,x))
+        jobs = unlist(lapply(jobs, function(x) substr(x, 1, regexec('.', x, fixed = T)[[1]][1]-1)))
 
         #hold to see if things work
         sge_hold_via_sync(st, 'holder', jobs)
 
         #get the files that should exist
-        req_files = paste0(st$general_settings$sge_parameters$working_folder, model_grid[,get('files')], '.rds')
-        good_files = file.exists(req_files)
+        subcheck = check_submodels(st)
+        good_files= subcheck[[1]]
 
         if(all(good_files)){
           repeat_iter = st$general_settings$sge_parameters$repeat_iterations
@@ -83,7 +75,10 @@ run_stacking_child_models = function(st){
 
       if(!all(good_files)){
         message('Not all models worked/finished')
-        lapply(paste(req_files[!good_files], jobs[!good_files]), message)
+
+        #list broken files
+
+
         stop('Not all models worked/finished')
       }
 
@@ -93,46 +88,6 @@ run_stacking_child_models = function(st){
     stacking_models = lapply(req_files, readRDS)
   }
 
-  #set the names
-  names(stacking_models) = paste(model_grid[,get('model_name')],
-                                 model_grid[,get('fold_columns')],
-                                 model_grid[,get('fold_ids')], sep = "_")
-  #format the results to be in the full model cv model and the model objs
+  return(compile_submodels(st, stacking_models))
 
-  #split predictions and model objects
-  #model objects
-  model_objs = sapply(stacking_models,'[',2)
-  model_objs = model_objs[!sapply(model_objs, is.null)]
-
-  #predictions
-  preds = sapply(stacking_models,'[',1)
-  #merge them all together
-  preds = Reduce(function(...) merge(..., all = T), preds)
-
-  #condense into full pred and cv pred
-  #full preds
-  preds = setnames(preds, paste0(names(st$models),'.NA.NA'),paste0(names(st$models),'_full_pred'))
-  #condense cv preds and create an object for return
-  #select the required columns into a new dataset
-  cv_preds = preds[,!grep('_full_pred', names(preds), fixed = T, value =T), with =F]
-  cv_preds = cv_preds[, lapply(names(st$models), function(x) rowMeans(cv_preds[, grep(x, names(cv_preds), value = T), with = F], na.rm = T))]
-  setnames(cv_preds,  paste0(names(st$models),'_cv_pred'))
-
-  #create return dataset with full predictions and cv predictions
-  #checks implicitly to see if holdouts were used
-  if(nrow(cv_preds)>0){
-    all_preds = cbind(preds[,paste0(names(st$models),'_full_pred'),with =F],cv_preds)
-    #add rid
-    all_preds = cbind(st$data[,'rid', with = F], all_preds)
-  }else{
-    all_preds = preds
-  }
-  #fix model names
-  names(model_objs) = names(st$models)
-
-  #create return object
-  ret_obj = list(all_preds, model_objs)
-  names(ret_obj) = c('preds', 'model_objs')
-
-  return(ret_obj)
 }

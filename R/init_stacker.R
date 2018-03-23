@@ -99,7 +99,14 @@ init_stacker = function(..., inlist = T, data, indicator, indicator_family, cova
   if(centre_scale) govner$cs_df = cov_vals[[2]]
 
   #omit missing rows and make row ids
+  start = nrow(govner$data)
   govner$data = na.omit(govner$data, cols = govner$general_settings$covs)
+  end = nrow(govern$data)
+
+  if(start != end){
+    warnings(paste('Dropped', round(start/end,2)*100, 'percent of the dataset becausing of missing covariate values.'))
+  }
+
   govner$data[,('rid') := 1:nrow(govner$data)]
 
   #add to general settings

@@ -3,6 +3,8 @@
 export(addQuotes)
 export(addQuotes_d)
 export(addQuotes_s)
+export(check_submodels)
+export(compile_submodels)
 export(emplogit)
 export(extract_covariates)
 export(fetch_covariate_layer)
