@@ -63,13 +63,14 @@ init_stacker = function(..., inlist = T, data, indicator, indicator_family, cova
     folds = num_fold_cols
 
     #check to make sure all fold columns have the same number/fold identifiers
-    fold_val_pos = lapply(folds, function(x) sort(unique(govner$data[,get(x)])))
-    fvp_check = unlist(lapply(fold_val_pos[2:length(fold_val_pos)], function(x) all.equal(fold_val_pos[[1]], x)))
+    if(length(folds)>1){
+      fold_val_pos = lapply(folds, function(x) sort(unique(govner$data[,get(x)])))
+      fvp_check = unlist(lapply(fold_val_pos[2:length(fold_val_pos)], function(x) all.equal(fold_val_pos[[1]], x)))
 
-    if(!all(fvp_check)){
-      stop('Some of your fold columns do not have the same fold identifiers. Please fix this.')
+      if(!all(fvp_check)){
+        stop('Some of your fold columns do not have the same fold identifiers. Please fix this.')
+      }
     }
-
     fold_vals = unique(govner$data[,get(folds[1])])
     fold_names = folds
 
