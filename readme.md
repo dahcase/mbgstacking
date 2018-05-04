@@ -1,11 +1,18 @@
 # Stacked Generalization for Model Based Geostatistics
 
+## Overview
+
+Stacked generalization is a method of ensembling machine learning algorithms and/or statisical models such that the combination of a collection of children models performs better on predictive validity statistics than any individual component. In this implementation, a two stage approach where a series of first stage (child) models are fit and then are ensembled in a parent geostatistical model is assumed as the default workflow. It is also assumed that the user is a friend of IHME (although all are welcome) and has access to high performance computing. Specifically, the packake is designed to take advantange of IHME's cluster computing infrastructure.
+
+This work was inspired by Bhatt et al. (http://rsif.royalsocietypublishing.org/content/14/134/20170520.figures-only) and further details on the "why?" can be found there.
+
+
 ## How To Install
 
-## What and Why
+```devtools::install_github('dahcase/mbgstacking')```
 
-This library contains a set of functions to run stacked generalization ensemble models within the context of IHME's model-based geostatistic framework.
+## Getting Started
 
-The translation of this code base into a fully fledged R-package is still in progress and the existing documentation exploits internal IHME shared knowledge (updated documentation is on the todo list).
+## Tests
 
-The paper (https://arxiv.org/abs/1612.03278) provides the inspiration
+## General Tips
