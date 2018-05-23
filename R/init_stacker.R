@@ -105,7 +105,7 @@ init_stacker = function(..., inlist = T, data, indicator, indicator_family, cova
   end = nrow(govner$data)
 
   if(start != end){
-    warnings(paste('Dropped', round(start/end,2)*100, 'percent of the dataset becausing of missing covariate values.'))
+    warning(paste('Dropped', round(end/start,2)*100, 'percent of the dataset becausing of missing covariate values.'))
   }
 
   govner$data[,('rid') := 1:nrow(govner$data)]
