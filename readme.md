@@ -15,6 +15,4 @@ This work was inspired by Bhatt et al. (http://rsif.royalsocietypublishing.org/c
 
 ## Tests
 
-At the moment, there is no strong unit-testing framework. There are a few all-up tests that are run informally after a new version release, but nothing systematic yet. This is because I didn't really know what unit-testing was when I was revising things. What a nieve youngin I was. Unit tests will be implemented once development re-resumes (in the next month or so). I will also be exploring formal class systems (e.g. S4 or R6) to handle the initialization, dispatch, and collection of models.
-
 ## General Tips
